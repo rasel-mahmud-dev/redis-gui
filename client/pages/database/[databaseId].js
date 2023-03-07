@@ -9,7 +9,8 @@ import {BiKey, BiPlus, BiRefresh, BiSearch, BiUser} from "react-icons/bi";
 import {useSelector} from "react-redux";
 import {FaEllipsisH, FaEllipsisV, FaSearch} from "react-icons/fa";
 import {HiBars3} from "react-icons/hi2";
-import { TiTimes} from "react-icons/ti";
+import {TiTimes} from "react-icons/ti";
+import AddKey from "../../components/AddKey";
 
 
 export const colors = {
@@ -36,9 +37,6 @@ const Database = () => {
 
     const [selectType, setSelectType] = useState("string")
 
-    const [hashValues, setHashValues]  = useState([
-        {field: "name", value: "sdfsdf"}
-    ])
 
     const router = useRouter()
     const {databaseId} = router.query
@@ -66,18 +64,9 @@ const Database = () => {
     ]
 
 
-    function handleOpenAddNewKey(){
+    function handleOpenAddNewKey() {
         setShowValues(true)
     }
-
-
-    function handleAddMoreInputField(valueType){
-        setHashValues([
-            ...hashValues,
-            {field: "", value: ""}
-        ])
-    }
-
 
 
     return (
@@ -171,7 +160,7 @@ const Database = () => {
                             <h4 style={{fontWeight: "600"}}>Total: {databaseKeys.length}</h4>
                             <div className="flex items-center gap-x-2 ">
                                 <h4 style={{fontWeight: "600"}}>Last refresh: 3 min </h4>
-                                <BiRefresh size={22} />
+                                <BiRefresh size={22}/>
                             </div>
                         </div>
 
@@ -179,7 +168,7 @@ const Database = () => {
                             <div className="flex list-item justify-between">
                                 <div className="flex justify-start items-center w-full gap-x-10">
                                     <span className="list-type data-type">
-                                        <Badge count={item.type} showZero color={colors[item.type.toLowerCase()]} />
+                                        <Badge count={item.type} showZero color={colors[item.type.toLowerCase()]}/>
                                     </span>
                                     <span className="">{item.name}</span>
                                 </div>
@@ -196,77 +185,48 @@ const Database = () => {
 
                     {isShowValues && <div className="card w-full">
 
-                       <div className="flex items-center justify-between" style={{marginBottom: "20px"}}>
-                           <h3 className="">New Key</h3>
-                           <TiTimes size={21} onClick={()=>setShowValues(false)} />
-                       </div>
+                        <div className="flex items-center justify-between" style={{marginBottom: "15px"}}>
+                            <h3 className="font-bold">New Key</h3>
+                            <TiTimes size={21} onClick={() => setShowValues(false)}/>
+                        </div>
 
 
+                        <Form
+                            name="basic"
+                            autoComplete="off"
+                            layout="vertical"
+                        >
 
-                       <Form
-                           name="basic"
-                           autoComplete="off"
-                           layout="vertical"
-                       >
+                            <label htmlFor="">Data Type</label>
+                            <MySelect
+                                onChange={(type) => setSelectType(type)}
+                                optionRender={(onChange) => (
+                                    <div>
+                                        {types.map((item, index) => (
+                                            <li onClick={() => onChange(item)}>
+                                                <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                       color={colors[item]}/>
+                                                {item.toUpperCase()}
+                                            </li>
+                                        ))}
+                                    </div>
+                                )}
 
-                           <MySelect
-                               onChange={(type)=>setSelectType(type)}
-                               optionRender={(onChange)=>(
-                                   <div>
-                                       {types.map((item, index)=>(
-                                           <li onClick={()=>onChange(item)}>
-                                               <Badge className="badge-big" style={{marginRight: "10px"}} color={colors[item]} />
-                                               {item.toUpperCase()}
-                                           </li>
-                                       ))}
-                                   </div>
-                               )}
+                                defaultValue={() => (
+                                    <div>
+                                        <Badge className="badge-big" style={{marginRight: "10px"}}
+                                               color={colors[selectType]}/>
+                                        {selectType.toUpperCase()}
+                                    </div>
+                                )}
+                            >
 
-                               defaultValue={()=>(
-                                   <div>
-                                       <Badge className="badge-big" style={{marginRight: "10px"}} color={colors[selectType]} />
-                                       {selectType.toUpperCase()}
-                                   </div>
-                               )}
-                           >
+                            </MySelect>
 
-                           </MySelect>
-
-                           <Form.Item
-                               style={{marginTop: "20px", marginBottom: "40px"}}
-                               label="Key Name"
-                               name="keyName"
-                               rules={[
-                                   {
-                                       required: true,
-                                       message: 'Please input key name!',
-                                   },
-                               ]}
-                           >
-                               <Input className="custom-input" />
-                           </Form.Item>
+                            <AddKey dataType={selectType}/>
 
 
-
-                           <div className="mb-4">
-                               {hashValues.map((item)=>(
-                                   <div className="flex items-center gap-x-5 ">
-                                       <Input className="custom-input mt-4" placeholder="Enter field"/>
-                                       <Input className="custom-input mt-4" placeholder="Value" />
-                                   </div>
-                               ))}
-                               <div className="mt-4">
-                                   <button className="default_button" onClick={()=>handleAddMoreInputField(selectType)}>
-                                       <BiPlus/>
-                                   </button>
-                               </div>
-                           </div>
-
-                           <button className="default_button" type="submit">
-                               Save
-                           </button>
-
-                       </Form>
+                        </Form>
                     </div>
                     }
                 </div>
@@ -287,14 +247,14 @@ function MySelect({optionRender, onChange, defaultValue}) {
 
     const [isOpen, setOpen] = useState(false)
 
-    function handleChoose(item){
+    function handleChoose(item) {
         onChange && onChange(item)
         setOpen(false)
     }
 
     return (
         <div className="my_select">
-            <div onClick={()=>setOpen(!isOpen)}>
+            <div onClick={() => setOpen(!isOpen)}>
                 {defaultValue()}
             </div>
             {isOpen ? <div className="options"> {optionRender(handleChoose)}</div> : null}
