@@ -1,0 +1,186 @@
+
+
+$dark-400: #383838;
+$primary-400: #062539;
+
+.frame{
+    background: #ffffff;
+    overflow: hidden;
+    height: 100vh;
+    .frame_root{
+        display: flex;
+        height: inherit;
+        aside{
+            background: #001624;
+            li{
+                color: white;
+                display: flex;
+                justify-content: center;
+                padding: 14px 16px;
+                img{
+                    width: 28px;
+                }
+            }
+        }
+    }
+
+    .top-bar{
+        background: #ececec;
+        padding: 20px;
+
+        ul{
+            margin-bottom: 0!important;
+        }
+
+    }
+
+    .content-root{
+        padding: 16px;
+        .default_button{
+            color: #d9d9d9 !important;
+            h3{
+                color: inherit;
+            }
+        }
+    }
+}
+
+.page-title{
+    color: $dark-400;
+    font-weight: 600;
+}
+.flex-right{
+    justify-content: end;
+    display: flex;
+}
+.custom-input{
+    .ant-input-wrapper{
+        border: 2px solid #856e6e;
+        border-radius: 4px;
+        input{
+            border: none;
+            outline: none !important;
+            color: #808080;
+            &::placeholder{
+                color: inherit;
+            }
+        }
+        .ant-input-group-addon{
+            background: #062539;
+            button{
+                border: none
+                //border-top-color: transparent;
+            }
+        }
+
+    }
+
+    &.ant-input{
+        border: 1px solid rgba(190, 190, 190, 0.45);
+        outline: none;
+        border-radius: 4px;
+        &:focus{
+            outline: none;
+        }
+    }
+}
+
+.db-list-row{
+    display: flex;
+    column-gap: 20px;
+
+    @include getDown(768px){
+        flex-direction: column;
+    }
+
+
+    .db-list{}
+    .add-db-form{
+        border: 1px solid rgba(6, 37, 57, 0.14);
+        max-width: 500px;
+        width: 0;
+        opacity: 0;
+        transition: width .4s ease, opacity 1s;
+        border-radius: 10px;
+        padding: 20px;
+        box-sizing: border-box;
+        @include getDown(768px){
+            max-width: 100%;
+        }
+        &.open{
+           width: 100%;
+            opacity: 1;
+        }
+    }
+}
+
+.card{
+    box-shadow: 0 2px 11px 2px rgb(56 56 56 / 11%);
+    border-radius: 4px;
+    padding: 14px;
+}
+.flex-1{
+    flex: 1;
+}
+
+.list-keys{
+    .data-type{
+        //background: #2c65ec;
+        //padding: 2px 10px;
+        //border-radius: 4px;
+
+    }
+    .list-type{
+        width: 100px;
+        text-transform: uppercase;
+        color: white;
+    }
+    .list-item{
+        margin:8px 0px;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        padding: 8px 5px;
+        cursor: pointer;;
+        &:hover{
+            background: $primary-400;
+        color: white;
+            }
+    }
+}
+
+.my_select{
+    border: 1px solid rgba(45, 45, 45, 0.41);
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    position: relative;
+    cursor: pointer;
+    .options{
+        position: absolute;
+        top: 35px;
+        z-index: 1000;
+        background: white;
+        width: 100%;
+        overflow-y: auto;
+        left: 0;
+        max-height: 400px;
+        box-shadow: 0 2px 10px -3px rgba(70, 70, 70, 0.64);
+        border-radius: 6px;
+        li{
+            padding: 10px;
+            transition: all .3s ease;
+            cursor: pointer;
+            &:hover{
+                color: white;
+                background: $primary-400;
+            };
+        }
+    }
+}
+
+.badge-big{
+    .ant-badge-status-dot{
+        width: 10px;
+        height: 10px;
+    }
+}

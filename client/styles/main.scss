@@ -1,0 +1,72 @@
+
+//common
+@import './common/variable';
+@import './common/default';
+@import './common/mixin';
+
+@import "./pages/redis-gui";
+
+body{
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    background-color: #F8F8F8;
+}
+
+
+.flex{display: flex}
+.flex-column{flex-direction: column}
+.justify-center{justify-content: center}
+.justify-end{justify-content: end}
+.justify-between{justify-content: space-between}
+.items-center{align-items: center}
+.items-end{align-items: end}
+.items-baseline{align-items: baseline}
+.w-full{width: 100%}
+.pointer{cursor: pointer}
+.gap-x-2{column-gap: 5px}
+.gap-x-5{column-gap: 15px}
+.gap-x-10{column-gap: 30px}
+.mt-4{margin-top: 12px}
+.mt-2{margin-top: 5px}
+.mb-4{margin-bottom: 12px}
+.mb-2{margin-bottom: 5px}
+
+.input-with-select{
+    border: 1px solid rgba(72, 72, 72, 0.6);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    padding: 4px 10px;
+    width: max-content;
+
+    select{
+        border-right: 1px solid #b6b6b6 !important;
+    }
+
+    input, select{
+        background: transparent;
+        outline: none;
+        border: none;
+        font-family: inherit;
+    }
+    input{
+        padding: 0 10px;
+    }
+    .icon{
+        border-left: 1px solid #b6b6b6 !important;
+        padding-left: 10px;
+        svg{
+            display: flex;
+        }
+    }
+
+
+
+}
+
+//thirdparty
+@import 'antd/dist/antd.css';
+
+
+
