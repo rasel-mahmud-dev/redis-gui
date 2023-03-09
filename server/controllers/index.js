@@ -135,11 +135,27 @@ exports.getKeys = async (req, res, next)=>{
     try{
         let client = await redisConnections(databaseId, redisClient)
         let result = await client.keys("*")
-        res.status(200).json({
-            total: result.length,
-            keys: result
-        })
+        let output = []
+        if(result && Array.isArray(result)){
+            result.forEach((item, idx)=>{
 
+                (async function (){
+
+                    let dataType = await client.type("name")
+                    output.push({
+                        [item]: dataType
+                    })
+
+                    if(idx + 1 === result.length){
+                        res.status(200).json({
+                            total: result.length,
+                            keys: output
+                        })
+                    }
+                }())
+
+            })
+        }
 
     } catch(ex){
         next(ex)
