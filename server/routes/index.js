@@ -1,4 +1,6 @@
-const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue} =  require("../controllers");
+const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue, updateStringValue,
+    deleteKeys
+} =  require("../controllers");
 
 const express = require("express");
 
@@ -18,6 +20,12 @@ router.get("/api/v1/databases/:databaseId/connect", connectDatabase)
 // perform with string datatype
 router.get("/api/v1/databases/:databaseId/string", getStringValue)
 router.post("/api/v1/databases/:databaseId/string", createStringValue)
+router.put("/api/v1/databases/:databaseId/string", updateStringValue)
+
+
+
+// delete keys
+router.delete("/api/v1/databases/:databaseId/keys", deleteKeys)
 
 
 
