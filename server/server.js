@@ -15,18 +15,16 @@ app.get("/", (req, res)=>{
     res.send("hi")
 })
 
-app.get("/db", async (req, res)=>{
-    const {host, port, username, password } = req.body
 
-    let client = redis.createClient()
-    console.log(host, port)
-    await client.connect()
-    await client.set('name', 'rasel mahmud');
-    const value = await client.get('name');
+app.use((err, req, res, next)=>{
+    let status = err.status || 500
 
-    res.send(value)
-
+    res.send(status).json({
+        message: err.message || "Internal Error"
+    })
 })
+
+
 
 const PORT  = process.env.PORT || 2000
 

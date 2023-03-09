@@ -1,26 +1,38 @@
-const Redis = require("../models/Database");
+const Database = require("../models/Database");
 const redisConnections = require("../utils/redisConnections")
 
 const redisClient  = {}
 
+// get all saved databases
 exports.getAllDatabases = async (req, res, next)=>{
-    const dbList = await Redis.find()
-    res.status(200).json(dbList)
+    try{
+        const dbList = await Database.find()
+        res.status(200).json(dbList)
+    } catch (ex){
+        next(ex)
+    }
 }
 
-
+// create new database
 exports.createDatabase = async (req, res, next)=>{
     const {alias, host, port, username, password } = req.body
-    let newConnection = new Redis({
-        alias,
-        host,
-        port: Number(port),
-        username,
-        password,
-        userId: "6409bac9162ddd7b5c7030ce"
-    })
-    newConnection = await newConnection.save()
-    res.status(200).json(newConnection)
+    let title = alias ? alias : host + ":" + port
+
+    try{
+        let newConnection = new Database({
+            alias: title,
+            host,
+            port: Number(port),
+            username,
+            password,
+            userId: "6409bac9162ddd7b5c7030ce"
+        })
+        newConnection = await newConnection.save()
+        res.status(200).json(newConnection)
+
+    } catch (ex){
+        next(ex)
+    }
 }
 
 
@@ -30,10 +42,8 @@ exports.connectDatabase = async (req, res, next)=>{
 
     let client = await redisConnections(databaseId, redisClient)
 
-    console.log(client)
-
     res.status(201).json({
-        message: "Redis connection ok"
+        message: "Redis database connected"
     })
 }
 
@@ -49,7 +59,7 @@ exports.getStringValue = async (req, res, next)=>{
        let value = await client.GET(key)
        res.status(201).json(value)
    } catch(ex){
-       console.log(ex)
+       next(ex)
    }
 }
 
@@ -59,7 +69,7 @@ exports.createStringValue = async (req, res, next)=>{
     const {key, value} = req.body
 
     if(!key) return res.status(403).json({message: "Please provide key"})
-    if(!value) return res.status(403).json({message: "Please value"})
+    if(!value) return res.status(403).json({message: "Please provide value"})
 
     try{
         let client = await redisConnections(databaseId, redisClient)
@@ -67,7 +77,7 @@ exports.createStringValue = async (req, res, next)=>{
         console.log(result)
         res.status(201).json({success: "ok"})
     } catch(ex){
-        console.log(ex)
+        next(ex)
     }
 }
 
@@ -85,7 +95,7 @@ exports.updateStringValue = async (req, res, next)=>{
         let result = await client.SET(key, value)
         res.status(201).json({success: "ok"})
     } catch(ex){
-        console.log(ex)
+        next(ex)
     }
 }
 
@@ -95,7 +105,7 @@ exports.deleteKeys = async (req, res, next)=>{
     const {keys} = req.body
     const { databaseId } = req.params
 
-    if(!keys || !Array.isArray(keys)) return res.status(403).json({message: "Please provide array of keys"})
+    if(!keys || !Array.isArray(keys)) return res.status(403).json({message: "Please provide array of key"})
 
     try{
         let client = await redisConnections(databaseId, redisClient)
@@ -110,9 +120,29 @@ exports.deleteKeys = async (req, res, next)=>{
             }())
         })
 
+    } catch(ex){
+        next(ex)
+    }
+}
+
+
+// delete string value
+exports.getKeys = async (req, res, next)=>{
+    const { databaseId } = req.params
+
+    if(!databaseId) return res.status(403).json({message: "Please provide database id"})
+
+    try{
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.keys("*")
+        res.status(200).json({
+            total: result.length,
+            keys: result
+        })
+
 
     } catch(ex){
-        console.log(ex)
+        next(ex)
     }
 }
 

@@ -1,5 +1,5 @@
 const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue, updateStringValue,
-    deleteKeys
+    deleteKeys, getKeys
 } =  require("../controllers");
 
 const express = require("express");
@@ -26,6 +26,11 @@ router.put("/api/v1/databases/:databaseId/string", updateStringValue)
 
 // delete keys
 router.delete("/api/v1/databases/:databaseId/keys", deleteKeys)
+
+
+
+// get current database keys
+router.get("/api/v1/databases/:databaseId/keys", getKeys)
 
 
 

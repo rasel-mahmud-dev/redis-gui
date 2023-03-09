@@ -5,6 +5,10 @@ const Database = mongoose.model("Database", new mongoose.Schema({
         type: String,
         required: true
     },
+    alias: {
+        type: String,
+        required: true
+    },
     port: {
         type: Number,
         required: true
@@ -22,7 +26,7 @@ const Database = mongoose.model("Database", new mongoose.Schema({
     modules: [],
     new: {
         type: Boolean,
-        default: false
+        default: true
     },
     provider: {
         type: String,
