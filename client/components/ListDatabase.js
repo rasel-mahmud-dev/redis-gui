@@ -5,6 +5,7 @@ import {Popconfirm, Table} from "antd";
 import {BiPen, BiPencil, BiTrash} from "react-icons/bi";
 import ActionTypes from "../store/actionTypes";
 import  {useRouter} from "next/router";
+import axios from "axios";
 
 const ListDatabase = () => {
 
@@ -18,9 +19,15 @@ const ListDatabase = () => {
 
     function handleDelete(id) {
         // delete from database
-        dispatch({
-            type: ActionTypes.DELETE_DATABASE,
-            payload: id
+        axios.delete("databases/" + id).then(({status})=>{
+            if(status === 201){
+                dispatch({
+                    type: ActionTypes.DELETE_DATABASE,
+                    payload: id
+                })
+            }
+        }).catch(ex=>{
+
         })
     }
 
@@ -92,6 +99,7 @@ const ListDatabase = () => {
         _id: item._id,
         key: idx,
         alias: item.alias,
+        port: item.port,
         hostPost: item.host + ":" + item.port,
         lastConnection: moment(item.lastConnection).fromNow()
     }))

@@ -1,14 +1,20 @@
 const express = require("express")
 const morgan = require("morgan")
+const cors = require("cors")
+
+
+require("dotenv").config({})
 const app = express()
 app.use(express.json())
 app.use(morgan("dev"))
+app.use(cors())
 
 const redis  = require("redis")
 const mongoose = require("mongoose");
 const routes = require("./routes");
 
 app.use(routes)
+
 
 
 app.get("/", (req, res)=>{
@@ -19,7 +25,7 @@ app.get("/", (req, res)=>{
 app.use((err, req, res, next)=>{
     let status = err.status || 500
 
-    res.send(status).json({
+    res.status(status).json({
         message: err.message || "Internal Error"
     })
 })
@@ -28,7 +34,7 @@ app.use((err, req, res, next)=>{
 
 const PORT  = process.env.PORT || 2000
 
-mongoose.connect("mongodb://127.0.0.1:27017/redis-management").then(()=>{
+mongoose.connect(process.env.MONGODB_URL).then(()=>{
     console.log("mongodb connected")
 }).catch((ex)=>{
     console.log(ex, "sdfkj")

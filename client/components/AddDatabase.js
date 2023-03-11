@@ -1,14 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Checkbox, Form, Input} from 'antd';
+import {Button, Checkbox, Form, Input, InputNumber, Spin} from 'antd';
 import {toggleOpenDbForm} from "../actions/redisTools";
 import {useDispatch, useSelector} from "react-redux";
 import ActionTypes from "../store/actionTypes";
+import axios from "axios";
+import HttpResponse from "./HttpResponse";
+import useHttpResponse from "../hooks/useHtttpResponse";
 
 
-const AddDatabase = () => {
+const AddDatabase = ({isOpenAddDbForm}) => {
     const [form] = Form.useForm();
     const {updateDatabaseId, databases} = useSelector(state => state.redisTools)
     const [updateItem, setUpdateItem] = useState({})
+
+    const [status, setStatus, resetStatus] = useHttpResponse()
+
 
     useEffect(() => {
         form.resetFields();
@@ -21,6 +27,9 @@ const AddDatabase = () => {
                     host: updateItem.host,
                     port: updateItem.port,
                     alias: updateItem.alias,
+                    username: updateItem.username,
+                    password: updateItem.password,
+                    timeout: updateItem.timeout,
                     connectionType: updateItem.connectionType,
                     lastConnection: updateItem.lastConnection,
                     modules: updateItem.modules,
@@ -34,33 +43,90 @@ const AddDatabase = () => {
 
     const dispatch = useDispatch()
 
+
+    useEffect(()=>{
+        if(!isOpenAddDbForm){
+            resetStatus()
+        }
+    }, [isOpenAddDbForm])
+
+
     const onFinish = (values) => {
 
+        if(isNaN(values.port)){
+            form.setFields([
+                {
+                    name: "port", // required
+                    value: values.port,//optional
+                    errors: ["Port should be an number"],
+                },
+            ]);
+            return;
+
+        } else if(values.port.toString().length !== 4){
+            form.setFields([
+                {
+                    name: "port", // required
+                    value: values.port,//optional
+                    errors: ["Port should be 4 digit"],
+                },
+            ]);
+            return;
+        }
+
+
+        let payload  = {
+            ...updateItem,
+            alias: values.host + ":" + values.port,
+            host: values.host,
+            port: Number(values.port),
+            username: values.username || "",
+            password: values.password || "",
+            timeout: values.timeout || 30000
+        }
+
+        setStatus(true, "", false)
 
         if(!updateDatabaseId){
-            // axios.post("/add-databse", values)
-            dispatch({
-                type: ActionTypes.ADD_DATABASE,
-                payload: {...values, _id: Date.now()}
+            axios.post("/databases", payload).then(({status, data})=>{
+                if(status === 201){
+                    dispatch({
+                        type: ActionTypes.ADD_DATABASE,
+                        payload: data
+                    })
+                    // close add database form
+                    dispatch({type: ActionTypes.CLOSE_ADD_DB_FORM})
+                }
+            }).catch(ex=>{
+                setStatus(false, ex.message, false)
+            }).finally(()=>{
+                setStatus(false, "", false)
             })
 
         } else{
-            // axios.post("/update-databse", values)
-            dispatch({
-                type: ActionTypes.UPDATE_DATABASE,
-                payload: {
-                    ...values,
-                    _id: updateDatabaseId
+            axios.put("/databases/"+updateDatabaseId, payload).then(({status, data})=>{
+                if(status === 201){
+
+                    dispatch({
+                        type: ActionTypes.UPDATE_DATABASE,
+                        payload: {
+                            ...data,
+                            _id: updateDatabaseId
+                        }
+                    })
+                    // close add database form
+                    dispatch({type: ActionTypes.CLOSE_ADD_DB_FORM})
                 }
+            }).catch(err=>{
+                setStatus(false, err.message, false)
+            }).finally(()=>{
+                setStatus(false, "", false)
             })
         }
-
-        // close add database form
-        dispatch(toggleOpenDbForm())
     };
 
     const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
+        setStatus(false, "", false)
     }
 
 
@@ -69,6 +135,9 @@ const AddDatabase = () => {
 
             <h3 className="page-title"
                 style={{marginBottom: "20px"}}>{updateDatabaseId ? "Update Database" : "Add New Database"}</h3>
+
+
+            <HttpResponse status={status} />
 
             <Form
                 form={form}
@@ -99,25 +168,27 @@ const AddDatabase = () => {
                         {
                             required: true,
                             message: 'Please provide Port number',
-                        },
+                        }
                     ]}
                 >
-                    <Input className="custom-input"/>
+                    <InputNumber className="custom-input"/>
                 </Form.Item>
 
-                <Form.Item
-                    label="Database Alias*"
-                    name="alias"
-                    className="custom-input"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please provide Port number',
-                        },
-                    ]}
-                >
-                    <Input className="custom-input"/>
-                </Form.Item>
+                { updateDatabaseId ? (
+                    <Form.Item
+                        label="Database Alias*"
+                        name="alias"
+                        className="custom-input"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please provide Port number',
+                            },
+                        ]}
+                    >
+                        <Input className="custom-input"/>
+                    </Form.Item>
+                ) : null }
 
 
                 <Form.Item
@@ -141,9 +212,10 @@ const AddDatabase = () => {
                 <Form.Item
                     label="Timeout (s)"
                     name="timeout"
+                    initialValue={3000}
                     className="custom-input"
                 >
-                    <Input className="custom-input"/>
+                    <InputNumber className="custom-input"/>
                 </Form.Item>
 
                 <Form.Item>
@@ -153,11 +225,11 @@ const AddDatabase = () => {
                         </button>}
                         <div style={{columnGap: "10px"}} className="flex items-center">
                             <button className="default_button" type="primary" htmlType="button"
-                                    onClick={() => dispatch(toggleOpenDbForm())}>
+                                    onClick={() => { resetStatus(); dispatch(toggleOpenDbForm())}}>
                                 Cancel
                             </button>
-                            <button className="default_button" type="primary" htmlType="submit">
-                                {updateDatabaseId ? "Update Database" : "Add Database"}
+                            <button disabled={status.isLoading} className="default_button " type="primary" htmlType="submit">
+                                { updateDatabaseId ? "Update Database" : "Add Database" }
                             </button>
                         </div>
                     </div>

@@ -1,17 +1,17 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import {Col, Divider, Row, Input, Typography, Table} from 'antd';
-import Image from "next/image";
+import {Col, Row, Input } from 'antd';
+
 import {BiPlus} from "react-icons/bi";
 import AddDatabase from "../components/AddDatabase";
 import {useDispatch, useSelector} from "react-redux";
-import {toggleOpenDbForm} from "../actions/redisTools";
+import {fetchDatabases, toggleOpenDbForm} from "../actions/redisTools";
 
 import ListDatabase from "../components/ListDatabase";
 
-const {Title, Paragraph, Text} = Typography;
 import RedisToolsLayout from "../layout/RedisToolsLayout"
 import ActionTypes from "../store/actionTypes";
+import {useEffect} from "react";
 
 const {Search} = Input;
 
@@ -21,6 +21,10 @@ export default function Home() {
 
 
     const {isOpenAddDbForm} = useSelector(state => state.redisTools)
+
+    useEffect(() => {
+        dispatch(fetchDatabases())
+    }, [])
 
 
     function onSearch(value) {
@@ -64,7 +68,7 @@ export default function Home() {
                         </div>
 
                         <div>
-                            <Search  className="custom-input" placeholder="Database List Search" onSearch={onSearch}
+                            <Search className="custom-input" placeholder="Database List Search" onSearch={onSearch}
                                     style={{width: 200}}/>
                         </div>
                     </div>
@@ -73,7 +77,7 @@ export default function Home() {
                     <div style={{marginTop: "12px"}} className="db-list-row">
                         <ListDatabase/>
                         <div className={`add-db-form ${isOpenAddDbForm ? "open" : "hide"}`}>
-                            <AddDatabase/>
+                            <AddDatabase isOpenAddDbForm={isOpenAddDbForm} />
                         </div>
 
                     </div>

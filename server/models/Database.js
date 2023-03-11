@@ -36,7 +36,7 @@ const Database = mongoose.model("Database", new mongoose.Schema({
         type: String,
         default: "STANDALONE"
     },
-}))
+}, {timestamps: true}))
 
 
 module.exports = Database

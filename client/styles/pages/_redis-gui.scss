@@ -54,6 +54,7 @@ $primary-400: #062539;
     display: flex;
 }
 .custom-input{
+    width: 100%;
     .ant-input-wrapper{
         border: 2px solid #856e6e;
         border-radius: 4px;
@@ -182,5 +183,16 @@ $primary-400: #062539;
     .ant-badge-status-dot{
         width: 10px;
         height: 10px;
+    }
+}
+
+
+.http-response{
+    border-radius: 6px;
+    &.error-message{
+        background: red;
+    }
+    &.success-message{
+        background: #769ffc;
     }
 }
