@@ -7,7 +7,8 @@ let init = {
     databases: [],
     filterDatabases: [],
     currentSelectedDb: null, // {}
-    filterDatabaseListText: ""
+    filterDatabaseListText: "",
+    connectedDatabaseId: ""
 }
 
 const redisTools = (state = init, action) => {
@@ -77,6 +78,13 @@ const redisTools = (state = init, action) => {
             return {
                 ...state,
                 databases: updatedDatabase
+            }
+
+
+        case ActionTypes.SET_ACTIVE_DATABASE_CONNECTION :
+            return {
+                ...state,
+                connectedDatabaseId: action.payload
             }
 
 

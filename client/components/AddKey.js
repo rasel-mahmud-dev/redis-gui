@@ -3,7 +3,13 @@ import HashAdd from "./AddKey/HashAdd";
 import StringAdd from "./AddKey/StringAdd";
 import ListAdd from "./AddKey/ListAdd";
 
-const AddKey = ({dataType}) => {
+
+
+const AddKey = ({dataType, dataKeys, databaseId, setAllkeysData, doneAddKey}) => {
+
+    function handleAddKeyData(keyName, value){
+
+    }
 
 
     const mapAddKey = {
@@ -17,7 +23,14 @@ const AddKey = ({dataType}) => {
 
     return (
         <div>
-            <Component selectType={dataType} />
+            <Component
+                databaseId={databaseId}
+                setAllkeysData={setAllkeysData}
+                dataKeys={dataKeys}
+                selectType={dataType}
+                doneAddKey={doneAddKey}
+                onAdd={handleAddKeyData}
+            />
 
         </div>
     );

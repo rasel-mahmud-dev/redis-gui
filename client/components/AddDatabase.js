@@ -47,6 +47,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
     useEffect(()=>{
         if(!isOpenAddDbForm){
             resetStatus()
+            form.resetFields()
         }
     }, [isOpenAddDbForm])
 

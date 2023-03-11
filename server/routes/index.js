@@ -1,5 +1,5 @@
 const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue, updateStringValue,
-    deleteKeys, getKeys, deleteDatabase, updateDatabase
+    deleteKeys, getKeys, deleteDatabase, updateDatabase, getDatabase, updateKeyName
 } =  require("../controllers");
 
 const express = require("express");
@@ -8,9 +8,8 @@ const express = require("express");
 const router = express.Router()
 
 
-
-
 router.get("/api/databases", getAllDatabases)
+router.get("/api/databases/:databaseId", getDatabase)
 router.post("/api/databases", createDatabase)
 router.put("/api/databases/:databaseId", updateDatabase)
 router.get("/api/databases/:databaseId/connect", connectDatabase)
@@ -25,8 +24,10 @@ router.put("/api/databases/:databaseId/string", updateStringValue)
 
 
 // delete keys
-router.delete("/api/databases/:databaseId/keys", deleteKeys)
+router.post("/api/databases/:databaseId/keys/delete", deleteKeys)
 
+// update database key name
+router.put("/api/databases/:databaseId/key", updateKeyName)
 
 
 // get current database keys

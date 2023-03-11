@@ -31,11 +31,18 @@ body{
 .mt-2{margin-top: 5px}
 .ml-2{margin-left: 5px}
 .ml-4{margin-left: 12px}
+.mr-2{margin-right: 5px}
+.mr-4{margin-right: 12px}
 .mb-4{margin-bottom: 12px}
 .mb-2{margin-bottom: 5px}
+.pb-4{padding-bottom: 12px}
+
 .font-medium{font-weight: 500}
 .font-bold{font-weight: 700}
 .font-semiBold{font-weight: 600}
+.border-b{
+    border-bottom: 1px solid rgba(93, 93, 93, 0.2);
+}
 
 .input-with-select{
     border: 1px solid rgba(72, 72, 72, 0.6);
@@ -65,11 +72,44 @@ body{
             display: flex;
         }
     }
+}
+.square-icon{
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #171717;
+    background: #eaeaea;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .3s ease;
+    &:hover{
+        background: $primary-400;
+        color: white;
+    }
 
-
+    &.outline{
+        background: transparent;
+        border: 1px solid $primary-400;
+        &:hover{
+            background: $primary-400 !important;
+            color: white;
+        }
+    }
 
 }
 
+.absolute{position: absolute}
+.top-10{top: 10px}
+.top-32{top: 32px}
+.-bottom-30{bottom: -30px}
+.right-0{right: 0px}
+.relative{position: relative}
+.pre-line{
+    white-space: pre-line;
+}
+.break-all{word-break: break-all}
 //thirdparty
 @import 'antd/dist/antd.css';
 

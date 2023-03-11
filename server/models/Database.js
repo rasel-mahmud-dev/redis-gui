@@ -36,6 +36,10 @@ const Database = mongoose.model("Database", new mongoose.Schema({
         type: String,
         default: "STANDALONE"
     },
+    lastConnection: {
+        type: Date,
+        default: Date.now
+    }
 }, {timestamps: true}))
 
 

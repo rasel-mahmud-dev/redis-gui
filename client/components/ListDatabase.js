@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import moment from "moment/moment";
 import {useDispatch, useSelector} from "react-redux";
-import {Popconfirm, Table} from "antd";
+import {Badge, Popconfirm, Table} from "antd";
 import {BiPen, BiPencil, BiTrash} from "react-icons/bi";
 import ActionTypes from "../store/actionTypes";
 import  {useRouter} from "next/router";
@@ -11,7 +11,7 @@ const ListDatabase = () => {
 
     const router  = useRouter()
 
-    const {databases, filterDatabaseListText, filterDatabases} = useSelector(state => state.redisTools)
+    const {databases, filterDatabaseListText, filterDatabases, connectedDatabaseId} = useSelector(state => state.redisTools)
 
     const dispatch = useDispatch()
 
@@ -57,7 +57,11 @@ const ListDatabase = () => {
         {
             title: 'Database Alias',
             dataIndex: 'alias',
-            render: (text, item) => <a onClick={() => handleSelectDatabase(item._id)}>{text}</a>,
+            render: (text, item) =><div>
+                 <Badge className="mr-2 badge-big" size="default" status={(item._id === connectedDatabaseId && connectedDatabaseId) ? "processing" : "default"} />
+                <a onClick={() => handleSelectDatabase(item._id)}>{text}</a>
+            </div>
+            ,
         },
         {
             title: 'Host:Port',

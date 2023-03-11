@@ -14,6 +14,16 @@ exports.getAllDatabases = async (req, res, next) => {
 }
 
 
+// get single database
+exports.getDatabase = async (req, res, next) => {
+    try {
+        const database = await Database.findOne({_id: req.params.databaseId})
+        res.status(200).json(database)
+    } catch (ex) {
+        next(ex)
+    }
+}
+
 // create new database
 exports.createDatabase = async (req, res, next) => {
     const {alias, host, port, username, password} = req.body
@@ -60,7 +70,7 @@ exports.updateDatabase = async (req, res, next) => {
             }
         )
 
-        if(!result) return next("Update fail")
+        if (!result) return next("Update fail")
         res.status(201).json(result)
 
     } catch (ex) {
@@ -89,25 +99,39 @@ exports.deleteDatabase = async (req, res, next) => {
 // connect redis client
 exports.connectDatabase = async (req, res, next) => {
     const {databaseId} = req.params
+    try {
+        let client = await redisConnections(databaseId)
+        client.SET("test", "test data")
+        if (client) {
 
-    let client = await redisConnections(databaseId, redisClient)
+            Database.findOneAndUpdate(
+                    {_id: databaseId},
+                    {$set: { lastConnection: new Date() }}
+            )
+            .then(()=>{})
+            .catch(()=>{})
 
-    res.status(201).json({
-        message: "Redis database connected"
-    })
+            res.status(201).json({
+                message: "Redis database connected",
+                databaseId: databaseId
+            })
+        }
+    } catch (ex) {
+        next("database connection fail.")
+    }
 }
 
 // get string value
 exports.getStringValue = async (req, res, next) => {
     const {databaseId} = req.params
-    const {key} = req.body
+    const {key} = req.query
 
     if (!key) return res.status(403).json({message: "Please provide key"})
 
     try {
-        let client = await redisConnections(databaseId, redisClient)
+        let client = await redisConnections(databaseId)
         let value = await client.GET(key)
-        res.status(201).json(value)
+        res.status(200).json(value)
     } catch (ex) {
         next(ex)
     }
@@ -149,6 +173,23 @@ exports.updateStringValue = async (req, res, next) => {
     }
 }
 
+// update key name
+exports.updateKeyName = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {oldKey, newName} = req.body
+
+    if (!oldKey) return res.status(403).json({message: "Please provide previous key"})
+    if (!newName) return res.status(403).json({message: "Please new key name"})
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.RENAME (oldKey, newName)
+        res.status(201).json({success: "ok"})
+    } catch (ex) {
+        next(ex)
+    }
+}
+
 
 // delete string value
 exports.deleteKeys = async (req, res, next) => {
@@ -178,22 +219,28 @@ exports.deleteKeys = async (req, res, next) => {
 
 // delete string value
 exports.getKeys = async (req, res, next) => {
-    const {databaseId} = req.params
+
+    const { databaseId } = req.params
 
     if (!databaseId) return res.status(403).json({message: "Please provide database id"})
 
     try {
-        let client = await redisConnections(databaseId, redisClient)
+        let client = await redisConnections(databaseId)
+
         let result = await client.keys("*")
         let output = []
-        if (result && Array.isArray(result)) {
+
+
+        if (result && Array.isArray(result) && result.length > 0) {
             result.forEach((item, idx) => {
 
                 (async function () {
 
-                    let dataType = await client.type("name")
+                    let dataType = await client.type(item)
                     output.push({
-                        [item]: dataType
+                        key: item,
+                        size: 1,
+                        dataType
                     })
 
                     if (idx + 1 === result.length) {
@@ -204,6 +251,11 @@ exports.getKeys = async (req, res, next) => {
                     }
                 }())
 
+            })
+        } else{
+            res.status(200).json({
+                total: 0,
+                keys: output
             })
         }
 

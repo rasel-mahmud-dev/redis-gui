@@ -196,3 +196,9 @@ $primary-400: #062539;
         background: #769ffc;
     }
 }
+
+.w-full{
+    .ant-card-body{
+        width: 100%;
+    }
+}

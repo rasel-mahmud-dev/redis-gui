@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import {Col, Row, Input } from 'antd';
+import {Col, Row, Input} from 'antd';
 
 import {BiPlus} from "react-icons/bi";
 import AddDatabase from "../components/AddDatabase";
@@ -45,29 +45,30 @@ export default function Home() {
             </Head>
             <div>
 
-                <Row className="top-bar">
-                    <Col span={12}>
-                        <Link href="/">
-                            <h3 className="page-title">
-                                My Redis Databases</h3>
-                        </Link>
-                    </Col>
-                    <Col span={12} className="flex-right">
-                        <h3 className="page-title">Redis DB</h3>
-                    </Col>
-                </Row>
-
-                <div className="content-root">
+                <div className="top-bar">
+                    <Row className="">
+                        <Col span={12}>
+                            <Link href="/">
+                                <h3 className="page-title">
+                                    My Redis Databases</h3>
+                            </Link>
+                        </Col>
+                        <Col span={12} className="flex-right">
+                            <h3 className="page-title">Redis DB</h3>
+                        </Col>
+                    </Row>
+                </div>
+                <div className="">
                     <div className="flex justify-between">
-                        <div>
+                        <div style={{margin: "10px"}}>
                             <button onClick={() => dispatch(toggleOpenDbForm())}
                                     className="flex items-center justify-center default_button">
                                 <BiPlus/>
-                                <h3 className="page-title">Add Database</h3>
+                                Add Database
                             </button>
                         </div>
 
-                        <div>
+                        <div style={{margin: "10px"}}>
                             <Search className="custom-input" placeholder="Database List Search" onSearch={onSearch}
                                     style={{width: 200}}/>
                         </div>
@@ -77,7 +78,7 @@ export default function Home() {
                     <div style={{marginTop: "12px"}} className="db-list-row">
                         <ListDatabase/>
                         <div className={`add-db-form ${isOpenAddDbForm ? "open" : "hide"}`}>
-                            <AddDatabase isOpenAddDbForm={isOpenAddDbForm} />
+                            <AddDatabase isOpenAddDbForm={isOpenAddDbForm}/>
                         </div>
 
                     </div>

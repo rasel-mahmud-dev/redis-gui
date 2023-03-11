@@ -1,16 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import RedisToolsLayout from "../../layout/RedisToolsLayout";
-import {Col, Row, Space, Tooltip, Radio, Tag, Select, Input, Badge, Form, Button} from "antd";
+import {Col, Row, Space, Tooltip, Radio, Tag, Select, Input, Badge, Form, Button, Card} from "antd";
 
 import {useRouter} from "next/router";
 import {FiArrowLeft} from "react-icons/fi";
 import {MdMemory} from "react-icons/md";
-import {BiKey, BiPlus, BiRefresh, BiSearch, BiUser} from "react-icons/bi";
-import {useSelector} from "react-redux";
+import {BiKey, BiPlus, BiRefresh, BiSearch, BiTrash, BiUser} from "react-icons/bi";
+import {useDispatch, useSelector} from "react-redux";
 import {FaEllipsisH, FaEllipsisV, FaSearch} from "react-icons/fa";
 import {HiBars3} from "react-icons/hi2";
 import {TiTimes} from "react-icons/ti";
 import AddKey from "../../components/AddKey";
+import axios from "axios";
+import DatabaseDetail from "../../components/Skeletons/DatabaseDetail";
+import ActionTypes from "../../store/actionTypes";
+import ShowKeyValues from "../../components/ShowKeyValues";
 
 
 export const colors = {
@@ -33,52 +37,153 @@ export const types = [
 const Database = () => {
 
     const [selectedDatabase, setSelectedDatabase] = useState(null)
-    const {databases, currentSelectedDb} = useSelector((state) => state.redisTools)
+    const {databases, connectedDatabaseId} = useSelector((state) => state.redisTools)
 
     const [selectType, setSelectType] = useState("string")
 
+    const [data, setData] = useState({
+        keys: [],  // {key: "name", dataType: "string", size: "104 B"}[],
+        total: 0
+    })
+
+
+    const dispatch = useDispatch()
+
 
     const router = useRouter()
+
     const {databaseId} = router.query
 
-    const [isShowValues, setShowValues] = useState(false)
+    const [isShowForm, setShowForm] = useState("")
+    const [showKey, setShowKey] = useState("")
 
 
     function handleGoBack() {
         router.push("/")
     }
 
+    // fetch database and connect redis database from this database info
     useEffect(() => {
+
         if (databaseId) {
-            let item = databases.find(db => db._id == databaseId)
-            setSelectedDatabase(item)
+            axios.get("/databases/" + databaseId).then(({status, data}) => {
+                if (status === 200) {
+                    setSelectedDatabase(data)
+
+                    //  connect redis database
+                    axios.get(`/databases/${databaseId}/connect`).then(({status, data}) => {
+                        if (status === 201) {
+                            // redis database connected
+                            dispatch({
+                                type: ActionTypes.SET_ACTIVE_DATABASE_CONNECTION,
+                                payload: data.databaseId
+                            })
+                        }
+                    }).catch(ex => {
+                        // database connection fail
+                    })
+                }
+            }).catch(ex => {
+
+            })
         }
+
     }, [databaseId])
 
-    let databaseKeys = [
-        {name: "name", type: "string", size: "104 B"},
-        {name: "list", type: "list", size: "104 B"},
-        {name: "person", type: "hash", size: "104 B"},
-        {name: "peoples", type: "list", size: "104 B"},
-        {name: "stream", type: "stream", size: "104 B"},
-    ]
 
+    // fetch all database keys
+    function fetchAllKeys(databaseId, connectedDatabaseId){
+        if (databaseId === connectedDatabaseId) {
+            // get all database keys
 
-    function handleOpenAddNewKey() {
-        setShowValues(true)
+            axios.get(`/databases/${connectedDatabaseId}/keys`).then(({data, status}) => {
+                if (status === 200) {
+                    setData(data)
+                }
+            }).catch(ex => {
+                console.log(ex)
+            })
+        }
     }
+
+    useEffect(() => {
+        fetchAllKeys(databaseId, connectedDatabaseId)
+    }, [databaseId, connectedDatabaseId])
+
+
+    function handleOpenShowKeyValue(key) {
+        setShowForm("value")
+        setShowKey(key)
+    }
+
+    function handleChangeKeyName(oldName, newName){
+        let updatedKeys = [...data.keys]
+        let changeKeyIndex = updatedKeys.findIndex(key=>key.key === oldName)
+        if(changeKeyIndex !== -1){
+            updatedKeys[changeKeyIndex] = {
+                ...updatedKeys[changeKeyIndex],
+                key: newName
+            }
+        }
+
+        // update state
+        setData((prevState)=>({
+            ...prevState,
+            keys: updatedKeys
+        }))
+
+        console.log(updatedKeys)
+    }
+
+    function handleCloseShowValue(){
+        setShowKey("")
+        setShowForm("")
+    }
+
+    // re-fetch all redis keys
+    function handleRefetchKeys(){
+        fetchAllKeys(databaseId, connectedDatabaseId)
+    }
+
+    // after completed add key
+    function handleDoneAddKey(){
+        setShowForm("")
+        setShowKey("")
+    }
+
+    // handledelete key
+    function handleDeleteKey(e, key){
+        e.stopPropagation();
+
+        axios.post(`/databases/${databaseId}/keys/delete`, {keys: [key]} ).then(({data, status})=>{
+            if(status === 201){
+                setData(prevState => ({
+                    total: prevState.total - 1,
+                    keys: prevState.keys.filter(item=>item.key !== key)
+                }))
+            }
+        }).catch(ex=>{
+            console.log(ex)
+        })
+    }
+
 
 
     return (
         <RedisToolsLayout>
-            {selectedDatabase ? <div>
+            <div>
                 <Row className="top-bar">
                     <Col span={12}>
 
                         <h3 className="page-title flex items-center">
                             <FiArrowLeft size={20} onClick={handleGoBack} className="pointer"
                                          style={{marginRight: "12px"}}/>
-                            <span>{selectedDatabase.alias}</span>
+
+                            <div className="flex items-center">
+                                <span>{selectedDatabase?.alias}</span>
+                                <Badge className="ml-2 badge-big" size="default"
+                                       status={(connectedDatabaseId && (databaseId === connectedDatabaseId)) ? "processing" : "default"}/>
+                            </div>
                         </h3>
 
                     </Col>
@@ -121,8 +226,7 @@ const Database = () => {
                     </Col>
                 </Row>
 
-                <div className="card w-full list-keys">
-
+                <Card className="w-full list-keys">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center input-with-select">
                             <select>
@@ -131,7 +235,7 @@ const Database = () => {
                                 ))
                                 }
                             </select>
-                            <input type="text" placeholder="Filer by key name "/>
+                            <input type="text" placeholder="Filer by key name"/>
                             <div className="icon">
                                 <FaSearch/>
                             </div>
@@ -143,99 +247,129 @@ const Database = () => {
                             </div>
 
 
-                            <div className="flex items-center input-with-select" onClick={handleOpenAddNewKey}>
+                            <div className="flex items-center input-with-select" onClick={() => setShowForm("add")}>
                                 <BiPlus size={22}/>
                                 <span>Key</span>
                             </div>
                         </div>
 
                     </div>
-                </div>
+                </Card>
 
+                {selectedDatabase ?
+                    <div style={{padding: "15px"}} className="flex justify-between gap-x-5 w-full">
 
-                <div style={{padding: "15px"}} className="flex justify-between gap-x-5">
-
-                    <div className="card w-full list-keys">
-                        <div className="flex items-center gap-x-2 justify-between">
-                            <h4 style={{fontWeight: "600"}}>Total: {databaseKeys.length}</h4>
-                            <div className="flex items-center gap-x-2 ">
-                                <h4 style={{fontWeight: "600"}}>Last refresh: 3 min </h4>
-                                <BiRefresh size={22}/>
+                        <div className="card w-full list-keys">
+                            <div className="flex items-center gap-x-2 justify-between">
+                                <h4 style={{fontWeight: "600"}}>Total: {data.total}</h4>
+                                <div className="flex items-center gap-x-2 ">
+                                    <h4 style={{fontWeight: "600"}}>Last refresh: 3 min </h4>
+                                    <div className="square-icon outline" onClick={handleRefetchKeys}>
+                                        <BiRefresh size={20}/>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {databaseKeys.map(item => (
-                            <div className="flex list-item justify-between">
-                                <div className="flex justify-start items-center w-full gap-x-10">
+                            {data.keys?.map((item) => (
+                                <div className="flex list-item justify-between"
+                                     onClick={() => handleOpenShowKeyValue(item.key)}>
+                                    <div className="flex justify-start items-center w-full gap-x-10">
                                     <span className="list-type data-type">
-                                        <Badge count={item.type} showZero color={colors[item.type.toLowerCase()]}/>
+                                        <Badge count={item.dataType} showZero
+                                               color={colors[item?.dataType?.toLowerCase()]}/>
                                     </span>
-                                    <span className="">{item.name}</span>
+                                        <span className="">{item.key}</span>
+                                    </div>
+
+                                    <div className="flex justify-end items-center w-full gap-x-10">
+                                        <span className="">No limit</span>
+                                        <span className="">{item.size}</span>
+
+                                        <BiTrash size={16} onClick={(e)=>handleDeleteKey(e, item.key)}/>
+
+                                    </div>
+
+
+
                                 </div>
 
-                                <div className="flex justify-end items-center w-full gap-x-10">
-                                    <span className="">No limit</span>
-                                    <span className="">{item.size}</span>
-                                </div>
-                            </div>
-
-                        ))}
-
-                    </div>
-
-                    {isShowValues && <div className="card w-full">
-
-                        <div className="flex items-center justify-between" style={{marginBottom: "15px"}}>
-                            <h3 className="font-bold">New Key</h3>
-                            <TiTimes size={21} onClick={() => setShowValues(false)}/>
+                            ))}
                         </div>
 
+                        {isShowForm === "add" && (
+                            <div className="card w-full">
+                                <div className="flex items-center justify-between" style={{marginBottom: "15px"}}>
+                                    <h3 className="font-bold">New Key</h3>
+                                    <TiTimes size={21} onClick={() => setShowForm("add")}/>
+                                </div>
 
-                        <Form
-                            name="basic"
-                            autoComplete="off"
-                            layout="vertical"
-                        >
+                                <Form
+                                    name="basic"
+                                    layout="vertical"
+                                >
 
-                            <label htmlFor="">Data Type</label>
-                            <MySelect
-                                onChange={(type) => setSelectType(type)}
-                                optionRender={(onChange) => (
-                                    <div>
-                                        {types.map((item, index) => (
-                                            <li onClick={() => onChange(item)}>
+                                    <label htmlFor="">Data Type</label>
+                                    <MySelect
+                                        onChange={(type) => setSelectType(type)}
+                                        optionRender={(onChange) => (
+                                            <div>
+                                                {types.map((item, index) => (
+                                                    <li onClick={() => onChange(item)}>
+                                                        <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                               color={colors[item]}/>
+                                                        {item.toUpperCase()}
+                                                    </li>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        defaultValue={() => (
+                                            <div>
                                                 <Badge className="badge-big" style={{marginRight: "10px"}}
-                                                       color={colors[item]}/>
-                                                {item.toUpperCase()}
-                                            </li>
-                                        ))}
-                                    </div>
-                                )}
+                                                       color={colors[selectType]}/>
+                                                {selectType.toUpperCase()}
+                                            </div>
+                                        )}
+                                    >
 
-                                defaultValue={() => (
-                                    <div>
-                                        <Badge className="badge-big" style={{marginRight: "10px"}}
-                                               color={colors[selectType]}/>
-                                        {selectType.toUpperCase()}
-                                    </div>
-                                )}
-                            >
+                                    </MySelect>
 
-                            </MySelect>
+                                </Form>
 
-                            <AddKey dataType={selectType}/>
+                                {/******* add new redis key with value ******/}
+                                <AddKey
+                                    dataKeys={data}
+                                    setAllkeysData={setData}
+                                    databaseId={databaseId}
+                                    dataType={selectType}
+                                    doneAddKey={handleDoneAddKey}
+                                />
 
+                            </div>
+                        )
+                        }
 
-                        </Form>
+                        {/******** show redis key value *******/}
+                        {isShowForm === "value" && <div className="card w-full">
+                            <ShowKeyValues
+                                onKeyNameChange={handleChangeKeyName}
+                                onCloseShowValue={handleCloseShowValue}
+                                showKey={showKey}
+                                connectedDatabaseId={connectedDatabaseId}
+                                databaseId={databaseId}
+                                data={data}
+                                selectType={selectType}
+                            />
+                        </div>
+                        }
+
                     </div>
-                    }
-                </div>
-
-            </div> : (
-                <div>
-                    <h1>Please select a database</h1>
-                </div>
-            )}
+                    : (
+                        <Card style={{padding: "15px"}}>
+                            <DatabaseDetail/>
+                        </Card>
+                    )}
+            </div>
 
 
         </RedisToolsLayout>

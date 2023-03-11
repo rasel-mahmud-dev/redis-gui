@@ -10,6 +10,10 @@ const ActionTypes = {
 
     SET_CURRENT_SELECTED_DB: "SET_CURRENT_SELECTED_DB",
     CHANGE_SEARCH_DBLIST_TEXT: "CHANGE_SEARCH_DBLIST_TEXT",
+
+
+    // mark database connected active sign
+    SET_ACTIVE_DATABASE_CONNECTION: "SET_ACTIVE_DATABASE_CONNECTION",
 }
 
 export default ActionTypes
