@@ -1,6 +1,5 @@
 import Head from 'next/head'
-import Link from 'next/link'
-import {Col, Row, Input, Modal} from 'antd';
+import {Input, Modal} from 'antd';
 
 import {BiPlus} from "react-icons/bi";
 import AddDatabase from "../components/Redis/AddDatabase";
@@ -52,7 +51,9 @@ export default function Home() {
             </Head>
             <div>
                 <Header/>
-                <div className="">
+                <div className="top-bar-space"></div>
+
+                <div className="" style={{marginLeft: "60px"}}>
                     <div className="flex justify-between">
                         <div style={{margin: "10px"}}>
                             <button onClick={() => dispatch(toggleOpenDbForm())}

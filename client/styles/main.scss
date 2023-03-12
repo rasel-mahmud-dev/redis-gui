@@ -13,14 +13,16 @@ body{
     background-color: #F8F8F8;
 }
 
-
+.text-primary{color: $primary_color}
 .flex{display: flex}
 .flex-column{flex-direction: column}
+.justify-center{justify-content: center}
 .justify-center{justify-content: center}
 .justify-end{justify-content: end}
 .justify-between{justify-content: space-between}
 .items-center{align-items: center}
 .items-end{align-items: end}
+.items-start{align-items: start}
 .items-baseline{align-items: baseline}
 .w-full{width: 100%}
 .pointer{cursor: pointer}

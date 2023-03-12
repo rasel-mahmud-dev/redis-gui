@@ -300,3 +300,79 @@ exports.testConnectDatabase = async (req, res, next) => {
     }
 }
 
+
+
+
+// get list value
+exports.getListValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key} = req.query
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+
+    try {
+        let client = await redisConnections(databaseId)
+        let values = await client.lRange(key, 0, -1) // get all list values
+        res.status(200).json(values)
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+// insert list value
+exports.createListValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, list} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!list && !Array.isArray(list)) return res.status(403).json({message: "Please provide list values"})
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.rPush(key, list)
+        res.status(201).json({success: "ok"})
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+// push list new Element
+exports.pushListElement = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, value, order = 1} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!value) return res.status(403).json({message: "Please provide list values"})
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        let result;
+        if(order === 0){
+            result = await client.lPush(key, value)
+        } else if(order === 1){
+            result = await client.rPush(key, value)
+        }
+
+        res.status(201).json({success: "ok"})
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+// delete an Element using index
+exports.deleteListElement = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, elementIndex, value} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!value) return res.status(403).json({message: "Please provide element value"})
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.lRem(key,  1, value)
+        console.log(result)
+        res.status(201).json({success: "ok"})
+    } catch (ex) {
+        next(ex)
+    }
+}

@@ -1,5 +1,6 @@
 const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue, updateStringValue,
-    deleteKeys, getKeys, deleteDatabase, updateDatabase, getDatabase, updateKeyName, testConnectDatabase
+    deleteKeys, getKeys, deleteDatabase, updateDatabase, getDatabase, updateKeyName, testConnectDatabase,
+    createListValue, getListValue, pushListElement, deleteListElement
 } =  require("../controllers");
 
 const express = require("express");
@@ -20,6 +21,19 @@ router.delete("/api/databases/:databaseId", deleteDatabase)
 router.get("/api/databases/:databaseId/string", getStringValue)
 router.post("/api/databases/:databaseId/string", createStringValue)
 router.put("/api/databases/:databaseId/string", updateStringValue)
+
+
+
+
+
+// perform with list datatype
+router.get("/api/databases/:databaseId/list", getListValue)
+router.post("/api/databases/:databaseId/list/push", pushListElement)
+router.post("/api/databases/:databaseId/list/delete", deleteListElement)
+router.post("/api/databases/:databaseId/list", createListValue)
+router.put("/api/databases/:databaseId/list", updateStringValue)
+
+
 
 
 

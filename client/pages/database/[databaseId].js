@@ -4,7 +4,7 @@ import {Col, Row, Badge, Form, Card, Table, Modal} from "antd";
 
 import {useRouter} from "next/router";
 import {FiArrowLeft} from "react-icons/fi";
-import { BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
+import {BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
 import {useDispatch, useSelector} from "react-redux";
 import {FaSearch} from "react-icons/fa";
 import {HiBars3} from "react-icons/hi2";
@@ -93,14 +93,14 @@ const Database = () => {
                             })
 
 
-                            setData((prev)=>({
+                            setData((prev) => ({
                                 ...prev,
                                 memoryUsage: responseData.slats.memoryUsage,
                                 cpuUsage: responseData.slats.cpuUsage,
                                 connectedClients: responseData.slats.connectedClients,
                                 total: responseData.slats.totalKeys
                             }))
-                        } else{
+                        } else {
                             setDatabaseConnectionFail(true)
                         }
                     }).catch(ex => {
@@ -126,7 +126,7 @@ const Database = () => {
             axios.get(`/databases/${connectedDatabaseId}/keys`).then(({data, status}) => {
                 if (status === 200) {
                     setLastRefresh(new Date())
-                    setData(prev=>({
+                    setData(prev => ({
                         ...prev,
                         keys: data.keys
                     }))
@@ -142,9 +142,10 @@ const Database = () => {
     }, [databaseId, connectedDatabaseId])
 
 
-    function handleOpenShowKeyValue(key) {
+    function handleOpenShowKeyValue(key, dataType) {
         setShowForm("value")
         setShowKey(key)
+        setSelectType(dataType)
     }
 
     function handleChangeKeyName(oldName, newName) {
@@ -173,7 +174,8 @@ const Database = () => {
 
     // re-fetch all redis keys
     function handleRefetchKeys() {
-        setData((prev)=>({
+        setShowForm("")
+        setData((prev) => ({
             ...prev,
             keys: []
         }))
@@ -209,7 +211,7 @@ const Database = () => {
             title: 'Type',
             dataIndex: 'dataType',
             key: 'dataType',
-            sorter: (a, b)=> a.dataType > b.dataType ? 1 : a.dataType < b.dataType ? -1 : 0,
+            sorter: (a, b) => a.dataType > b.dataType ? 1 : a.dataType < b.dataType ? -1 : 0,
             render: (_, item) => <div>
                     <span className="list-type data-type">
                         <Badge
@@ -222,9 +224,9 @@ const Database = () => {
             title: 'Key',
             dataIndex: 'key',
             key: 'key',
-            sorter: (a, b)=> a.key > b.key ? 1 : a.key < b.key ? -1 : 0,
-            render: (key)=>(
-                <a onClick={() => handleOpenShowKeyValue(key)}>
+            sorter: (a, b) => a.key > b.key ? 1 : a.key < b.key ? -1 : 0,
+            render: (key, item) => (
+                <a onClick={() => handleOpenShowKeyValue(key, item.dataType)}>
                     {key}
                 </a>
             )
@@ -233,17 +235,17 @@ const Database = () => {
             title: 'TTL',
             dataIndex: 'ttl',
             key: 'ttl',
-            render: (_)=>(
+            render: (_) => (
                 <div>
                     No limit
                 </div>
             )
         },
-{
+        {
             title: 'Size',
             dataIndex: 'size',
             key: 'size',
-            render: (_)=>(
+            render: (_) => (
                 <div>
                     1KB
                 </div>
@@ -266,7 +268,8 @@ const Database = () => {
         <RedisToolsLayout>
 
             {/**** Error Popup for mongodb redis database fetch failure *****/}
-            <Modal className="add-database-modal" title="" onCancel={()=>setShowErrorMessage(false)} open={isShowErrorMessage}
+            <Modal className="add-database-modal" title="" onCancel={() => setShowErrorMessage(false)}
+                   open={isShowErrorMessage}
                    footer={null}
             >
                 <h3 className="" style={{color: "#fa4b4b"}}>Database connection fail. Please check your internet</h3>
@@ -277,13 +280,14 @@ const Database = () => {
             <Modal className="add-database-modal" title="" cancelButtonProps={null} open={isDatabaseConnectionFail}
                    footer={[
                        <button
-                          className="default_button" onClick={()=>router.push("/")}
+                           className="default_button" onClick={() => router.push("/")}
                        >
                            Check Connection URL
                        </button>,
                    ]}
             >
-                <h3 className="" style={{color: "#fa4b4b"}}>Database connection fail. Please check host name, port number for this connection.</h3>
+                <h3 className="" style={{color: "#fa4b4b"}}>Database connection fail. Please check host name, port
+                    number for this connection.</h3>
             </Modal>
 
             <div>
@@ -303,133 +307,142 @@ const Database = () => {
 
                     </Col>
                     <Col span={12} className="flex-right">
-                        <DatabaseSlats meta={data} />
+                        <DatabaseSlats meta={data}/>
                     </Col>
                 </Row>
+                <div className="top-bar-space"></div>
 
-                <Card className="w-full list-keys">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center input-with-select">
-                            <select>
-                                {types.map(item => (
-                                    <option>{item}</option>
-                                ))
-                                }
-                            </select>
-                            <input type="text" placeholder="Filer by key name"/>
-                            <div className="icon">
-                                <FaSearch/>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-x-2">
+                <div className="" style={{marginLeft: "60px"}}>
+                    <Card className="w-full list-keys">
+                        <div className="flex items-center justify-between">
                             <div className="flex items-center input-with-select">
-                                <HiBars3 size={22}/>
-                            </div>
-
-
-                            <div className="flex items-center input-with-select" onClick={() => setShowForm("add")}>
-                                <BiPlus size={22}/>
-                                <span>Key</span>
-                            </div>
-                        </div>
-
-                    </div>
-                </Card>
-
-                {selectedDatabase ?
-                    <div style={{padding: "15px"}} className="flex justify-between gap-x-5 w-full">
-
-                        <div className="card w-full list-keys">
-                            <div className="flex items-center gap-x-2 justify-between">
-                                <h4 style={{fontWeight: "600"}}>Total: {data.total}</h4>
-                                <div className="flex items-center gap-x-2 ">
-                                    <h4 style={{fontWeight: "600"}}>Last refresh: {moment().fromNow(lastRefresh)} </h4>
-                                    <div className="square-icon outline" onClick={handleRefetchKeys}>
-                                        <BiRefresh size={20}/>
-                                    </div>
+                                <select>
+                                    {types.map(item => (
+                                        <option>{item}</option>
+                                    ))
+                                    }
+                                </select>
+                                <input type="text" placeholder="Filer by key name"/>
+                                <div className="icon">
+                                    <FaSearch/>
                                 </div>
                             </div>
 
-                            <Table dataSource={data.keys} columns={columns} loading={data.keys.length === 0} />
+                            <div className="flex items-center gap-x-2">
+                                <div className="flex items-center input-with-select">
+                                    <HiBars3 size={22}/>
+                                </div>
+
+
+                                <div className="flex items-center input-with-select" onClick={() => setShowForm("add")}>
+                                    <BiPlus size={22}/>
+                                    <span>Key</span>
+                                </div>
+                            </div>
 
                         </div>
+                    </Card>
 
-                        {isShowForm === "add" && (
-                            <div className="card w-full">
-                                <div className="flex items-center justify-between" style={{marginBottom: "15px"}}>
-                                    <h3 className="font-bold">New Key</h3>
-                                    <div className="square-icon outline">
-                                        <TiTimes size={21} onClick={() => setShowForm("")}/>
+
+                    {selectedDatabase ?
+                        <div style={{padding: "15px"}} className="flex justify-between gap-x-5 w-full">
+
+                            <div className="card w-full list-keys">
+                                <div className="flex items-center gap-x-2 justify-between">
+                                    <h4 style={{fontWeight: "600"}}>Total: {data.total}</h4>
+                                    <div className="flex items-center gap-x-2 ">
+                                        <h4 style={{fontWeight: "600"}}>Last
+                                            refresh: {moment().fromNow(lastRefresh)} </h4>
+                                        <div className="square-icon outline" onClick={handleRefetchKeys}>
+                                            <BiRefresh size={20}/>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <Form
-                                    name="basic"
-                                    layout="vertical"
-                                >
 
-                                    <label htmlFor="">Data Type</label>
-                                    <MySelect
-                                        onChange={(type) => setSelectType(type)}
-                                        optionRender={(onChange) => (
-                                            <div>
-                                                {types.map((item, index) => (
-                                                    <li onClick={() => onChange(item)}>
-                                                        <Badge className="badge-big" style={{marginRight: "10px"}}
-                                                               color={colors[item]}/>
-                                                        {item.toUpperCase()}
-                                                    </li>
-                                                ))}
-                                            </div>
-                                        )}
+                                {/******* render all redis keys ******/}
+                                <Table dataSource={data.keys} columns={columns} loading={data.keys.length === 0}/>
 
-                                        defaultValue={() => (
-                                            <div>
-                                                <Badge className="badge-big" style={{marginRight: "10px"}}
-                                                       color={colors[selectType]}/>
-                                                {selectType.toUpperCase()}
-                                            </div>
-                                        )}
+                            </div>
+
+
+                            {/******* add redis key form ******/}
+                            {isShowForm === "add" && (
+                                <div className="card w-full">
+                                    <div className="flex items-center justify-between" style={{marginBottom: "15px"}}>
+                                        <h3 className="font-bold">New Key</h3>
+                                        <div className="square-icon outline">
+                                            <TiTimes size={21} onClick={() => setShowForm("")}/>
+                                        </div>
+                                    </div>
+
+                                    <Form
+                                        name="basic"
+                                        layout="vertical"
                                     >
 
-                                    </MySelect>
+                                        <label htmlFor="">Data Type</label>
+                                        <MySelect
+                                            onChange={(type) => setSelectType(type)}
+                                            optionRender={(onChange) => (
+                                                <div>
+                                                    {types.map((item, index) => (
+                                                        <li onClick={() => onChange(item)}>
+                                                            <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                                   color={colors[item]}/>
+                                                            {item.toUpperCase()}
+                                                        </li>
+                                                    ))}
+                                                </div>
+                                            )}
 
-                                </Form>
+                                            defaultValue={() => (
+                                                <div>
+                                                    <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                           color={colors[selectType]}/>
+                                                    {selectType.toUpperCase()}
+                                                </div>
+                                            )}
+                                        >
 
-                                {/******* add new redis key with value ******/}
-                                <AddKey
-                                    dataKeys={data}
-                                    setAllkeysData={setData}
+                                        </MySelect>
+
+                                    </Form>
+
+                                    {/******* add new redis key with value ******/}
+                                    <AddKey
+                                        dataKeys={data}
+                                        setAllkeysData={setData}
+                                        databaseId={databaseId}
+                                        dataType={selectType}
+                                        doneAddKey={handleDoneAddKey}
+                                    />
+
+                                </div>
+                            )
+                            }
+
+                            {/******** show redis key value *******/}
+                            {isShowForm === "value" && <div className="card w-full">
+                                <ShowKeyValues
+                                    onKeyNameChange={handleChangeKeyName}
+                                    onCloseShowValue={handleCloseShowValue}
+                                    showKey={showKey}
+                                    connectedDatabaseId={connectedDatabaseId}
                                     databaseId={databaseId}
-                                    dataType={selectType}
-                                    doneAddKey={handleDoneAddKey}
+                                    data={data}
+                                    selectType={selectType}
                                 />
-
                             </div>
-                        )
-                        }
+                            }
 
-                        {/******** show redis key value *******/}
-                        {isShowForm === "value" && <div className="card w-full">
-                            <ShowKeyValues
-                                onKeyNameChange={handleChangeKeyName}
-                                onCloseShowValue={handleCloseShowValue}
-                                showKey={showKey}
-                                connectedDatabaseId={connectedDatabaseId}
-                                databaseId={databaseId}
-                                data={data}
-                                selectType={selectType}
-                            />
                         </div>
-                        }
-
-                    </div>
-                    : (
-                        <Card style={{padding: "15px"}}>
-                            <DatabaseDetail/>
-                        </Card>
-                    )}
+                        : (
+                            <Card style={{padding: "15px"}}>
+                                <DatabaseDetail/>
+                            </Card>
+                        )}
+                </div>
             </div>
 
 

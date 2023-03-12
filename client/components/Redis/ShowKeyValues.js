@@ -6,6 +6,7 @@ import {TiTimes} from "react-icons/ti";
 import axios from "axios";
 
 import StringVal from "./Values/StringVal";
+import ListValue from "./Values/ListVal";
 
 
 const ShowKeyValues = (props) => {
@@ -60,7 +61,7 @@ const ShowKeyValues = (props) => {
     const mapAddKey = {
         string: StringVal,
         // hash: HashAdd,
-        // list: ListAdd,
+        list: ListValue,
     }
 
     const Component = mapAddKey[selectType]

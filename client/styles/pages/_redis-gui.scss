@@ -1,74 +1,100 @@
-
-
 $dark-400: #383838;
 $primary-400: #062539;
 
-.frame{
+:root {
+    --header-height: 66px
+}
+
+.frame {
     background: #ffffff;
-    overflow: hidden;
-    height: 100vh;
-    .frame_root{
+    //overflow: hidden;
+    //height: 100vh;
+    .frame_root {
         display: flex;
         height: inherit;
-        aside{
+
+        .sidebar-root {
+            position: fixed;
+            left: 0;
+            height: 100vh;
             background: #001624;
-            li{
+
+            li {
                 color: white;
                 display: flex;
                 justify-content: center;
                 padding: 14px 16px;
-                img{
+
+                img {
                     width: 28px;
                 }
             }
         }
     }
 
-    .top-bar{
+    .top-bar {
         background: #ececec;
+        z-index: 10000;
         padding: 20px;
+        position: fixed;
+        top: 0;
+        left: 60px;
+        //left: calc(100% - var(--header-height));
+        width: calc(100% - 60px);
 
-        ul{
-            margin-bottom: 0!important;
+        ul {
+            margin-bottom: 0 !important;
         }
-
     }
 
-    .content-root{
+    .top-bar-space {
+        height: var(--header-height);
+    }
+
+    .content-root {
         padding: 16px;
-        .default_button{
+
+        .default_button {
             color: #d9d9d9 !important;
-            h3{
+
+            h3 {
                 color: inherit;
             }
         }
     }
 }
 
-.page-title{
+.page-title {
     color: $dark-400;
     font-weight: 600;
 }
-.flex-right{
+
+.flex-right {
     justify-content: end;
     display: flex;
 }
-.custom-input{
+
+.custom-input {
     width: 100%;
-    .ant-input-wrapper{
+
+    .ant-input-wrapper {
         border: 2px solid #856e6e;
         border-radius: 4px;
-        input{
+
+        input {
             border: none;
             outline: none !important;
             color: #808080;
-            &::placeholder{
+
+            &::placeholder {
                 color: inherit;
             }
         }
-        .ant-input-group-addon{
+
+        .ant-input-group-addon {
             background: #062539;
-            button{
+
+            button {
                 border: none
                 //border-top-color: transparent;
             }
@@ -76,11 +102,12 @@ $primary-400: #062539;
 
     }
 
-    &.ant-input{
+    &.ant-input {
         border: 1px solid rgba(190, 190, 190, 0.45);
         outline: none;
         border-radius: 4px;
-        &:focus{
+
+        &:focus {
             outline: none;
         }
     }
@@ -88,9 +115,10 @@ $primary-400: #062539;
 
 
 .add-database-modal {
-    .ant-modal-content{
+    .ant-modal-content {
         border-radius: 8px !important;
     }
+
     .add-db-form {
         //border: 1px solid rgba(6, 37, 57, 0.14);
         max-width: 500px;
@@ -109,48 +137,53 @@ $primary-400: #062539;
     }
 }
 
-.card{
+.card {
     box-shadow: 0 2px 11px 2px rgb(56 56 56 / 11%);
     border-radius: 4px;
     padding: 14px;
 }
-.flex-1{
+
+.flex-1 {
     flex: 1;
 }
 
-.list-keys{
-    .data-type{
+.list-keys {
+    .data-type {
         //background: #2c65ec;
         //padding: 2px 10px;
         //border-radius: 4px;
 
     }
-    .list-type{
+
+    .list-type {
         width: 100px;
         text-transform: uppercase;
         color: white;
     }
-    .list-item{
-        margin:8px 0px;
+
+    .list-item {
+        margin: 8px 0px;
         transition: all 0.3s ease;
         border-radius: 4px;
         padding: 8px 5px;
         cursor: pointer;;
-        &:hover{
+
+        &:hover {
             background: $primary-400;
-        color: white;
-            }
+            color: white;
+        }
     }
 }
 
-.my_select{
+.my_select {
     border: 1px solid rgba(45, 45, 45, 0.41);
     padding: 8px 12px;
     border-radius: 6px;
 
     position: relative;
     cursor: pointer;
-    .options{
+
+    .options {
         position: absolute;
         top: 35px;
         z-index: 1000;
@@ -161,41 +194,106 @@ $primary-400: #062539;
         max-height: 400px;
         box-shadow: 0 2px 10px -3px rgba(70, 70, 70, 0.64);
         border-radius: 6px;
-        li{
+
+        li {
             padding: 10px;
             transition: all .3s ease;
             cursor: pointer;
-            &:hover{
+
+            &:hover {
                 color: white;
                 background: $primary-400;
-            };
+            }
+        ;
         }
     }
 }
 
-.badge-big{
-    .ant-badge-status-dot{
+.badge-big {
+    .ant-badge-status-dot {
         width: 10px;
         height: 10px;
     }
 }
 
 
-.http-response{
+.http-response {
     border-radius: 6px;
     padding: 12px;
     margin-bottom: 20px;
-    &.error-message{
+
+    &.error-message {
         background: rgba(229, 36, 36, 0.83);
         color: white;
     }
-    &.success-message{
+
+    &.success-message {
         background: #769ffc;
     }
 }
 
-.w-full{
-    .ant-card-body{
+.w-full {
+    .ant-card-body {
         width: 100%;
+    }
+}
+
+.list-value-table {
+    background: #fafafa;
+    .row {
+        padding: 6px 16px;
+        border-radius: 6px;
+
+        &:nth-child(2n + 1) {
+            background: rgba(213, 213, 213, 0.32);
+        }
+
+        &:nth-child(2n) {
+            background: #ffffff;
+        }
+
+        label{
+            width: 200px;
+        }
+        span {
+            display: flex;
+            width: 100%;
+
+            svg{
+                font-size: 16px;
+            }
+        }
+    }
+
+    .add-new{
+        background: white !important;
+        .action-ok-btn{
+            right: 16px;
+            bottom: -24px;
+        }
+    }
+
+    .row-head{
+        padding: 0 !important;
+        column-gap: 0;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.32) !important;
+        label{
+
+            border: 1px solid rgba(6, 37, 57, 0.42);
+            border-radius: 5px;
+            margin: 0!important;
+            padding: 10px 16px;
+            border-bottom-right-radius: 0;
+            border-top-right-radius: 0;
+        }
+        span{
+            padding: 10px 25px;
+            border: 1px solid rgba(6, 37, 57, 0.42);
+            border-radius: 5px;
+            border-left: none;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: 0;
+        }
     }
 }

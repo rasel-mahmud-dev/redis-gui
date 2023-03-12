@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import Link from "next/link";
 import {BiBell, BiEdit, BiKey, BiNotification} from "react-icons/bi";
 import {MdOutlineAnalytics} from "react-icons/md";
 import {GiBigGear} from "react-icons/gi";
@@ -21,14 +20,14 @@ const Aside = ({currentSelectedDb}) => {
             router.push(href)
         } else {
             router.push("/")
-            setError("Before Go to " + page )
+            setError(page)
         }
     }
 
     return (
-        <>
+        <section className="sidebar-root">
             <Modal className="add-database-modal" open={!!isError} footer={null} title={null} onCancel={()=>setError("")}>
-                <h3>Please select a database {isError} page</h3>
+                <h3>Please select a database before Go to <span style={{color: "text-primary"}}>{isError}</span> page</h3>
             </Modal>
 
             <aside className="flex flex-column justify-between">
@@ -65,7 +64,7 @@ const Aside = ({currentSelectedDb}) => {
                 </div>
 
             </aside>
-        </>
+        </section>
     );
 };
 
