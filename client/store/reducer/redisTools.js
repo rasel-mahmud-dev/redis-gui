@@ -68,6 +68,7 @@ const redisTools = (state = init, action) => {
         case ActionTypes.UPDATE_DATABASE :
             index = state.databases.findIndex((db => db._id === action.payload._id))
             updatedDatabase = [...state.databases]
+            console.log(index)
 
             if (index !== -1) {
                 updatedDatabase[index] = {
@@ -75,6 +76,8 @@ const redisTools = (state = init, action) => {
                     ...action.payload
                 }
             }
+            console.log(updatedDatabase, action.payload
+            )
             return {
                 ...state,
                 databases: updatedDatabase

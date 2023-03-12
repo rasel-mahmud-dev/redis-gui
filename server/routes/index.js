@@ -1,5 +1,5 @@
 const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue, updateStringValue,
-    deleteKeys, getKeys, deleteDatabase, updateDatabase, getDatabase, updateKeyName
+    deleteKeys, getKeys, deleteDatabase, updateDatabase, getDatabase, updateKeyName, testConnectDatabase
 } =  require("../controllers");
 
 const express = require("express");
@@ -34,7 +34,8 @@ router.put("/api/databases/:databaseId/key", updateKeyName)
 router.get("/api/databases/:databaseId/keys", getKeys)
 
 
-
+// test connection
+router.post("/api/databases/test-connection", testConnectDatabase)
 
 
 

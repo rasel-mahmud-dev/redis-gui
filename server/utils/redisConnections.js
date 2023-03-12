@@ -3,13 +3,8 @@ const redis = require("redis");
 const Database = require("../models/Database")
 
 
-function isLocalConnection(host) {
-    if (host.includes("localhost") || host.includes("127.0.0.1")) {
-        return true
-    } else {
-        return false
-    }
-}
+let connection = {}
+
 
 function redisConnections(databaseId) {
     return new Promise(async (resolve) => {
@@ -17,24 +12,34 @@ function redisConnections(databaseId) {
 
             let database = await Database.findOne({_id: databaseId})
             if (database) {
-                const {port, host, username= "", password= "", timeout = 3000} = database
-
+                const {port, host, username = "", password = "", timeout = 3000} = database
                 // connection already close. first make connection.
                 let client;
 
                 // const REDIS_URL = `rediss://${username}:${password}@${host}:${port}`
 
-                client = redis.createClient(isLocalConnection(host) ? {} : {
-                    password,
-                    username,
-                    socket: {
-                        host,
-                        port,
-                        connectTimeout: Number(timeout)
-                    }
-                })
+                if(connection[databaseId]){
+                    client = connection[databaseId]
 
-                await client.connect()
+                    if(!connection[databaseId].isReady){
+                        await client.connect()
+                    }
+
+                } else {
+                    client = redis.createClient({
+                        password,
+                        username,
+                        socket: {
+                            host,
+                            port,
+                            connectTimeout: Number(timeout)
+                        }
+                    })
+                    await client.connect()
+                    // add cache this connection
+                    connection[databaseId] = client
+                }
+
                 resolve(client)
 
             } else {
@@ -42,10 +47,35 @@ function redisConnections(databaseId) {
             }
 
         } catch (ex) {
-            console.log(ex)
             resolve(null)
         }
     })
 }
 
-module.exports = redisConnections
+
+function testRedisConnections({port, host, username = "", password = "", timeout = 30000}) {
+    return new Promise(async (resolve) => {
+        try {
+            // connection already close. first make connection.
+            let  client = redis.createClient(
+                {
+                password,
+                username,
+                socket: {
+                    host,
+                    port,
+                    connectTimeout: Number(timeout)
+                }
+
+            })
+
+            await client.connect()
+            resolve(client)
+
+        } catch (ex) {
+            resolve(null)
+        }
+    })
+}
+
+module.exports = {redisConnections,testRedisConnections }

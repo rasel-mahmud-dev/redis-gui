@@ -31,6 +31,7 @@ const StringAdd = ({selectType, databaseId, onAddKeyData, doneAddKey, setAllkeys
                     size: "104 B"
                 })
                 setAllkeysData(prev => ({
+                    ...prev,
                     total: prev.total + 1,
                     keys: updatedKeys
                 }))

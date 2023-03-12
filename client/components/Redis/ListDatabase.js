@@ -3,7 +3,7 @@ import moment from "moment/moment";
 import {useDispatch, useSelector} from "react-redux";
 import {Badge, Popconfirm, Table} from "antd";
 import {BiPen, BiPencil, BiTrash} from "react-icons/bi";
-import ActionTypes from "../store/actionTypes";
+import ActionTypes from "../../store/actionTypes";
 import  {useRouter} from "next/router";
 import axios from "axios";
 
@@ -57,19 +57,28 @@ const ListDatabase = () => {
         {
             title: 'Database Alias',
             dataIndex: 'alias',
+            key: "alias",
+            sorter: (a, b)=> a.alias > b.alias ? 1 : a.alias < b.alias ? -1 : 0,
             render: (text, item) =><div>
                  <Badge className="mr-2 badge-big" size="default" status={(item._id === connectedDatabaseId && connectedDatabaseId) ? "processing" : "default"} />
                 <a onClick={() => handleSelectDatabase(item._id)}>{text}</a>
             </div>
             ,
+
         },
         {
             title: 'Host:Port',
             dataIndex: 'hostPost',
+            sorter: (a, b)=> a.hostPost > b.hostPost ? 1 : a.hostPost < b.hostPost ? -1 : 0,
+        },
+        {
+            title: 'Connection Type',
+            dataIndex: 'connectionType',
         },
         {
             title: 'Last connection',
             dataIndex: 'lastConnection',
+            sorter: (a, b)=> a.lastConnection > b.lastConnection ? 1 : a.lastConnection < b.lastConnection ? -1 : 0,
         },
         {
             title: 'Action',
@@ -105,7 +114,8 @@ const ListDatabase = () => {
         alias: item.alias,
         port: item.port,
         hostPost: item.host + ":" + item.port,
-        lastConnection: moment(item.lastConnection).fromNow()
+        lastConnection: moment(item.lastConnection).fromNow(),
+        connectionType: item.connectionType
     }))
 
 
@@ -126,6 +136,7 @@ const ListDatabase = () => {
 
         <div className="db-list w-full">
             <Table
+                loading={(!data || data.length === 0) }
                 rowSelection={{
                     type: selectionType,
                     ...rowSelection,

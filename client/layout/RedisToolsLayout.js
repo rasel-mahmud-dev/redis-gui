@@ -1,20 +1,18 @@
-import {BiBell, BiEdit, BiKey, BiNotification} from "react-icons/bi";
-import {MdOutlineAnalytics} from "react-icons/md";
-import {GiBigGear} from "react-icons/gi";
 import {useDispatch, useSelector} from "react-redux";
 import {useEffect} from "react";
 import ActionTypes from "../store/actionTypes";
-import Link from "next/link";
 
-function RedisToolsLayout(props){
+import Aside from "../components/Redis/Aside";
 
-    const { databases, currentSelectedDb } = useSelector(state=>state.redisTools)
+function RedisToolsLayout(props) {
+
+    const {databases, currentSelectedDb, connectedDatabaseId} = useSelector(state => state.redisTools)
 
     const dispatch = useDispatch()
 
-    useEffect(()=>{
+    useEffect(() => {
         let connectedDb = currentSelectedDb
-        if(!currentSelectedDb){
+        if (!currentSelectedDb) {
             connectedDb = databases[0]
         }
 
@@ -27,45 +25,14 @@ function RedisToolsLayout(props){
 
     return (
         <div className="frame">
-                <div className="frame_root">
-                    <aside className="flex flex-column justify-between" >
-                        <div>
-                            <li>
-                                <Link href={`/`}><img src="/images/redis.png" alt=""/></Link>
-                            </li>
-                            <li>
-                                <Link href={`/database/${currentSelectedDb?._id}`}><BiKey size={24} /></Link>
-                            </li>
-                            <li>
-                                <Link href={`/database/${currentSelectedDb?._id}`}><BiEdit size={20} /></Link>
-                                {/*Workbench*/}
-                            </li>
-                            <li>
-                                <Link href={`/database/${currentSelectedDb?._id}`}><MdOutlineAnalytics size={20} /></Link>
-                                {/*Workbench*/}
-                            </li>
-                        </div>
+            <div className="frame_root">
 
-                        <div>
-                            <li>
-                                <BiBell size={24} />
-                                {/*Browser*/}
-                            </li>
-                            <li>
-                                <BiNotification size={20} />
-                                {/*Workbench*/}
-                            </li>
-                            <li>
-                                <GiBigGear size={20} />
-                                {/*Workbench*/}
-                            </li>
-                        </div>
-                    </aside>
+                <Aside currentSelectedDb={currentSelectedDb} connectedDatabaseId={connectedDatabaseId} />
 
-                    <div className="w-full">
-                        {props.children}
-                    </div>
+                <div className="w-full">
+                    {props.children}
                 </div>
+            </div>
 
         </div>
     )

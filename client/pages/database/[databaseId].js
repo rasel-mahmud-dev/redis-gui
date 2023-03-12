@@ -1,20 +1,22 @@
 import React, {useEffect, useState} from 'react';
 import RedisToolsLayout from "../../layout/RedisToolsLayout";
-import {Col, Row, Space, Tooltip, Radio, Tag, Select, Input, Badge, Form, Button, Card} from "antd";
+import {Col, Row, Badge, Form, Card, Table, Modal} from "antd";
 
 import {useRouter} from "next/router";
 import {FiArrowLeft} from "react-icons/fi";
-import {MdMemory} from "react-icons/md";
-import {BiKey, BiPlus, BiRefresh, BiSearch, BiTrash, BiUser} from "react-icons/bi";
+import { BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
 import {useDispatch, useSelector} from "react-redux";
-import {FaEllipsisH, FaEllipsisV, FaSearch} from "react-icons/fa";
+import {FaSearch} from "react-icons/fa";
 import {HiBars3} from "react-icons/hi2";
 import {TiTimes} from "react-icons/ti";
-import AddKey from "../../components/AddKey";
+import AddKey from "../../components/Redis/AddKey";
 import axios from "axios";
-import DatabaseDetail from "../../components/Skeletons/DatabaseDetail";
+import DatabaseDetail from "../../components/Redis/Skeletons/DatabaseDetail";
 import ActionTypes from "../../store/actionTypes";
-import ShowKeyValues from "../../components/ShowKeyValues";
+import ShowKeyValues from "../../components/Redis/ShowKeyValues";
+import moment from "moment";
+import MySelect from "../../components/Redis/MySelect/MySelect";
+import DatabaseSlats from "../../components/Redis/DatabaseSlats/DatabaseSlats";
 
 
 export const colors = {
@@ -39,12 +41,23 @@ const Database = () => {
     const [selectedDatabase, setSelectedDatabase] = useState(null)
     const {databases, connectedDatabaseId} = useSelector((state) => state.redisTools)
 
+    const [isShowErrorMessage, setShowErrorMessage] = useState(false)
+
+
     const [selectType, setSelectType] = useState("string")
+    const [lastRefresh, setLastRefresh] = useState(new Date())
 
     const [data, setData] = useState({
         keys: [],  // {key: "name", dataType: "string", size: "104 B"}[],
-        total: 0
+        total: 0,
+        memoryUsage: 0,
+        cpuUsage: 0,
+        totalKeys: 0,
+        connectedClients: 0,
+
     })
+
+    const [isDatabaseConnectionFail, setDatabaseConnectionFail] = useState(false)
 
 
     const dispatch = useDispatch()
@@ -66,24 +79,37 @@ const Database = () => {
     useEffect(() => {
 
         if (databaseId) {
-            axios.get("/databases/" + databaseId).then(({status, data}) => {
+            axios.get("/databases/" + databaseId).then(({status, data: data2}) => {
                 if (status === 200) {
-                    setSelectedDatabase(data)
+                    setSelectedDatabase(data2)
 
                     //  connect redis database
-                    axios.get(`/databases/${databaseId}/connect`).then(({status, data}) => {
+                    axios.get(`/databases/${databaseId}/connect`).then(({status, data: responseData}) => {
                         if (status === 201) {
                             // redis database connected
                             dispatch({
                                 type: ActionTypes.SET_ACTIVE_DATABASE_CONNECTION,
-                                payload: data.databaseId
+                                payload: responseData.databaseId
                             })
+
+
+                            setData((prev)=>({
+                                ...prev,
+                                memoryUsage: responseData.slats.memoryUsage,
+                                cpuUsage: responseData.slats.cpuUsage,
+                                connectedClients: responseData.slats.connectedClients,
+                                total: responseData.slats.totalKeys
+                            }))
+                        } else{
+                            setDatabaseConnectionFail(true)
                         }
                     }).catch(ex => {
                         // database connection fail
+                        setDatabaseConnectionFail(true)
                     })
                 }
             }).catch(ex => {
+                setShowErrorMessage(true)
 
             })
         }
@@ -92,13 +118,18 @@ const Database = () => {
 
 
     // fetch all database keys
-    function fetchAllKeys(databaseId, connectedDatabaseId){
+    function fetchAllKeys(databaseId, connectedDatabaseId) {
+
         if (databaseId === connectedDatabaseId) {
             // get all database keys
 
             axios.get(`/databases/${connectedDatabaseId}/keys`).then(({data, status}) => {
                 if (status === 200) {
-                    setData(data)
+                    setLastRefresh(new Date())
+                    setData(prev=>({
+                        ...prev,
+                        keys: data.keys
+                    }))
                 }
             }).catch(ex => {
                 console.log(ex)
@@ -116,10 +147,10 @@ const Database = () => {
         setShowKey(key)
     }
 
-    function handleChangeKeyName(oldName, newName){
+    function handleChangeKeyName(oldName, newName) {
         let updatedKeys = [...data.keys]
-        let changeKeyIndex = updatedKeys.findIndex(key=>key.key === oldName)
-        if(changeKeyIndex !== -1){
+        let changeKeyIndex = updatedKeys.findIndex(key => key.key === oldName)
+        if (changeKeyIndex !== -1) {
             updatedKeys[changeKeyIndex] = {
                 ...updatedKeys[changeKeyIndex],
                 key: newName
@@ -127,7 +158,7 @@ const Database = () => {
         }
 
         // update state
-        setData((prevState)=>({
+        setData((prevState) => ({
             ...prevState,
             keys: updatedKeys
         }))
@@ -135,42 +166,126 @@ const Database = () => {
         console.log(updatedKeys)
     }
 
-    function handleCloseShowValue(){
+    function handleCloseShowValue() {
         setShowKey("")
         setShowForm("")
     }
 
     // re-fetch all redis keys
-    function handleRefetchKeys(){
+    function handleRefetchKeys() {
+        setData((prev)=>({
+            ...prev,
+            keys: []
+        }))
         fetchAllKeys(databaseId, connectedDatabaseId)
     }
 
     // after completed add key
-    function handleDoneAddKey(){
+    function handleDoneAddKey() {
         setShowForm("")
         setShowKey("")
     }
 
     // handledelete key
-    function handleDeleteKey(e, key){
+    function handleDeleteKey(e, key) {
         e.stopPropagation();
 
-        axios.post(`/databases/${databaseId}/keys/delete`, {keys: [key]} ).then(({data, status})=>{
-            if(status === 201){
+        axios.post(`/databases/${databaseId}/keys/delete`, {keys: [key]}).then(({data, status}) => {
+            if (status === 201) {
                 setData(prevState => ({
+                    ...prevState,
                     total: prevState.total - 1,
-                    keys: prevState.keys.filter(item=>item.key !== key)
+                    keys: prevState.keys.filter(item => item.key !== key)
                 }))
             }
-        }).catch(ex=>{
+        }).catch(ex => {
             console.log(ex)
         })
     }
 
 
+    const columns = [
+        {
+            title: 'Type',
+            dataIndex: 'dataType',
+            key: 'dataType',
+            sorter: (a, b)=> a.dataType > b.dataType ? 1 : a.dataType < b.dataType ? -1 : 0,
+            render: (_, item) => <div>
+                    <span className="list-type data-type">
+                        <Badge
+                            count={item.dataType} showZero
+                            color={colors[item?.dataType?.toLowerCase()]}/>
+                    </span>
+            </div>
+        },
+        {
+            title: 'Key',
+            dataIndex: 'key',
+            key: 'key',
+            sorter: (a, b)=> a.key > b.key ? 1 : a.key < b.key ? -1 : 0,
+            render: (key)=>(
+                <a onClick={() => handleOpenShowKeyValue(key)}>
+                    {key}
+                </a>
+            )
+        },
+        {
+            title: 'TTL',
+            dataIndex: 'ttl',
+            key: 'ttl',
+            render: (_)=>(
+                <div>
+                    No limit
+                </div>
+            )
+        },
+{
+            title: 'Size',
+            dataIndex: 'size',
+            key: 'size',
+            render: (_)=>(
+                <div>
+                    1KB
+                </div>
+            )
+        },
+
+        {
+            title: 'Actions',
+            dataIndex: '',
+            key: '',
+            className: "text-end",
+            render: (_, item) => (
+                <BiTrash size={16} onClick={(e) => handleDeleteKey(e, item.key)}/>
+            )
+        },
+    ];
+
 
     return (
         <RedisToolsLayout>
+
+            {/**** Error Popup for mongodb redis database fetch failure *****/}
+            <Modal className="add-database-modal" title="" onCancel={()=>setShowErrorMessage(false)} open={isShowErrorMessage}
+                   footer={null}
+            >
+                <h3 className="" style={{color: "#fa4b4b"}}>Database connection fail. Please check your internet</h3>
+            </Modal>
+
+
+            {/**** Error Popup for redis cluster connection failure ****/}
+            <Modal className="add-database-modal" title="" cancelButtonProps={null} open={isDatabaseConnectionFail}
+                   footer={[
+                       <button
+                          className="default_button" onClick={()=>router.push("/")}
+                       >
+                           Check Connection URL
+                       </button>,
+                   ]}
+            >
+                <h3 className="" style={{color: "#fa4b4b"}}>Database connection fail. Please check host name, port number for this connection.</h3>
+            </Modal>
+
             <div>
                 <Row className="top-bar">
                     <Col span={12}>
@@ -188,41 +303,7 @@ const Database = () => {
 
                     </Col>
                     <Col span={12} className="flex-right">
-
-                        <ul className="flex items-center link-item" style={{columnGap: "30px"}}>
-                            <li className="">
-                                <Tooltip title="1.11 % CPU" className="flex items-center gap-x-2">
-                                    <MdMemory/>
-                                    <span>1.11 %</span>
-                                </Tooltip>
-                            </li>
-
-                            <li className="">
-                                <Tooltip title="10.11 % MEMORY" className="flex items-center gap-x-2">
-                                    <MdMemory/>
-                                    <span>10.11 %</span>
-                                </Tooltip>
-                            </li>
-
-                            <li className="">
-                                <Tooltip title="Keys 12" className="flex items-center gap-x-2">
-                                    <BiKey/>
-                                    <span>12</span>
-                                </Tooltip>
-                            </li>
-
-
-                            <li>
-                                <Tooltip title="Client connected 4" className="flex items-center gap-x-2">
-                                    <BiUser/>
-                                    <span>4</span>
-                                </Tooltip>
-                            </li>
-
-                            <li className="flex items-center gap-x-2">
-                                <FaEllipsisV/>
-                            </li>
-                        </ul>
+                        <DatabaseSlats meta={data} />
                     </Col>
                 </Row>
 
@@ -263,44 +344,24 @@ const Database = () => {
                             <div className="flex items-center gap-x-2 justify-between">
                                 <h4 style={{fontWeight: "600"}}>Total: {data.total}</h4>
                                 <div className="flex items-center gap-x-2 ">
-                                    <h4 style={{fontWeight: "600"}}>Last refresh: 3 min </h4>
+                                    <h4 style={{fontWeight: "600"}}>Last refresh: {moment().fromNow(lastRefresh)} </h4>
                                     <div className="square-icon outline" onClick={handleRefetchKeys}>
                                         <BiRefresh size={20}/>
                                     </div>
                                 </div>
                             </div>
 
-                            {data.keys?.map((item) => (
-                                <div className="flex list-item justify-between"
-                                     onClick={() => handleOpenShowKeyValue(item.key)}>
-                                    <div className="flex justify-start items-center w-full gap-x-10">
-                                    <span className="list-type data-type">
-                                        <Badge count={item.dataType} showZero
-                                               color={colors[item?.dataType?.toLowerCase()]}/>
-                                    </span>
-                                        <span className="">{item.key}</span>
-                                    </div>
+                            <Table dataSource={data.keys} columns={columns} loading={data.keys.length === 0} />
 
-                                    <div className="flex justify-end items-center w-full gap-x-10">
-                                        <span className="">No limit</span>
-                                        <span className="">{item.size}</span>
-
-                                        <BiTrash size={16} onClick={(e)=>handleDeleteKey(e, item.key)}/>
-
-                                    </div>
-
-
-
-                                </div>
-
-                            ))}
                         </div>
 
                         {isShowForm === "add" && (
                             <div className="card w-full">
                                 <div className="flex items-center justify-between" style={{marginBottom: "15px"}}>
                                     <h3 className="font-bold">New Key</h3>
-                                    <TiTimes size={21} onClick={() => setShowForm("add")}/>
+                                    <div className="square-icon outline">
+                                        <TiTimes size={21} onClick={() => setShowForm("")}/>
+                                    </div>
                                 </div>
 
                                 <Form
@@ -376,24 +437,5 @@ const Database = () => {
     );
 };
 
-
-function MySelect({optionRender, onChange, defaultValue}) {
-
-    const [isOpen, setOpen] = useState(false)
-
-    function handleChoose(item) {
-        onChange && onChange(item)
-        setOpen(false)
-    }
-
-    return (
-        <div className="my_select">
-            <div onClick={() => setOpen(!isOpen)}>
-                {defaultValue()}
-            </div>
-            {isOpen ? <div className="options"> {optionRender(handleChoose)}</div> : null}
-        </div>
-    )
-}
 
 export default Database;

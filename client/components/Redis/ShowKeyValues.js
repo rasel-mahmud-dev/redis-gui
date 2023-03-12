@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Badge, Input, message} from "antd";
-import {colors} from "../pages/database/[databaseId]";
+import {colors} from "../../pages/database/[databaseId]";
 import {BiCheck} from "react-icons/bi";
 import {TiTimes} from "react-icons/ti";
 import axios from "axios";
@@ -37,7 +37,6 @@ const ShowKeyValues = (props) => {
         })
     }
 
-
     function handleUpdateKey() {
         axios.put(`/databases/${databaseId}/key`, {
             oldKey: keyState.preValue,
@@ -58,10 +57,6 @@ const ShowKeyValues = (props) => {
         })
     }
 
-
-
-
-
     const mapAddKey = {
         string: StringVal,
         // hash: HashAdd,
@@ -75,7 +70,7 @@ const ShowKeyValues = (props) => {
         <div>
             <div className="flex items-center justify-between gap-x-5 border-b pb-4">
                 <div className="flex items-center gap-x-2 w-full">
-                    <Badge count={selectType} showZero color={colors[selectType?.toLowerCase()]}/>
+                    <Badge count={selectType.toUpperCase()} showZero color={colors[selectType?.toLowerCase()]}/>
                     <div className="relative w-full">
                         {keyState.isEditAble
                             ? <div>

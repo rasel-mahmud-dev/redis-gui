@@ -9,13 +9,13 @@ const HttpResponse = ({status}) => {
                 <div className="flex justify-center ">
                     <Spin />
                 </div>
-            ) : (
+            ) : message ? (
 
-                <div className={`http-response ${isSuccess ? "error-message" : "success-message"}`}>
+                <div className={`http-response ${!isSuccess ? "error-message" : "success-message"}`}>
                     <p>{message}</p>
                 </div>
 
-            )}
+            ) : null }
         </div>
     );
 };

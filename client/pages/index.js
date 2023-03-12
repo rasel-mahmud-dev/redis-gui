@@ -1,17 +1,18 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import {Col, Row, Input} from 'antd';
+import {Col, Row, Input, Modal} from 'antd';
 
 import {BiPlus} from "react-icons/bi";
-import AddDatabase from "../components/AddDatabase";
+import AddDatabase from "../components/Redis/AddDatabase";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchDatabases, toggleOpenDbForm} from "../actions/redisTools";
 
-import ListDatabase from "../components/ListDatabase";
+import ListDatabase from "../components/Redis/ListDatabase";
 
 import RedisToolsLayout from "../layout/RedisToolsLayout"
 import ActionTypes from "../store/actionTypes";
 import {useEffect} from "react";
+import Header from "../components/Redis/Header";
 
 const {Search} = Input;
 
@@ -34,6 +35,12 @@ export default function Home() {
         })
     }
 
+    function closeAddDatabaseForm(){
+        dispatch({
+            type: ActionTypes.CLOSE_ADD_DB_FORM,
+        })
+    }
+
 
     return (
         <RedisToolsLayout>
@@ -44,20 +51,7 @@ export default function Home() {
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
             <div>
-
-                <div className="top-bar">
-                    <Row className="">
-                        <Col span={12}>
-                            <Link href="/">
-                                <h3 className="page-title">
-                                    My Redis Databases</h3>
-                            </Link>
-                        </Col>
-                        <Col span={12} className="flex-right">
-                            <h3 className="page-title">Redis DB</h3>
-                        </Col>
-                    </Row>
-                </div>
+                <Header/>
                 <div className="">
                     <div className="flex justify-between">
                         <div style={{margin: "10px"}}>
@@ -75,11 +69,14 @@ export default function Home() {
                     </div>
 
 
-                    <div style={{marginTop: "12px"}} className="db-list-row">
+                    <div style={{marginTop: "12px"}} className="">
                         <ListDatabase/>
-                        <div className={`add-db-form ${isOpenAddDbForm ? "open" : "hide"}`}>
-                            <AddDatabase isOpenAddDbForm={isOpenAddDbForm}/>
-                        </div>
+
+                        <Modal className="add-database-modal" open={isOpenAddDbForm} footer={null} onCancel={closeAddDatabaseForm}>
+                            <div className={`add-db-form ${isOpenAddDbForm ? "open" : "hide"}`}>
+                                <AddDatabase isOpenAddDbForm={isOpenAddDbForm}/>
+                            </div>
+                        </Modal>
 
                     </div>
 

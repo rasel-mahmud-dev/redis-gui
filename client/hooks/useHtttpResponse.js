@@ -11,9 +11,9 @@ function useHttpResponse(){
     function setStatus(...args){
         _setStatus(prev=>({
             ...prev,
-            isLoading: args[0] || prev.isLoading,
-            message: args[1] || prev.message,
-            isSuccess: args[2] || prev.isSuccess,
+            isLoading: args[0] !== undefined ? args[0] : prev.isLoading,
+            message: args[1]  !== undefined ? args[1] : prev.message,
+            isSuccess: args[2]  !== undefined ? args[2] : prev.isSuccess,
         }))
     }
 

@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Checkbox, Form, Input, InputNumber, Spin} from 'antd';
-import {toggleOpenDbForm} from "../actions/redisTools";
+import { Button, Checkbox, Form, Input, InputNumber, message, Spin} from 'antd';
+import {toggleOpenDbForm} from "../../actions/redisTools";
 import {useDispatch, useSelector} from "react-redux";
-import ActionTypes from "../store/actionTypes";
+import ActionTypes from "../../store/actionTypes";
 import axios from "axios";
 import HttpResponse from "./HttpResponse";
-import useHttpResponse from "../hooks/useHtttpResponse";
+import useHttpResponse from "../../hooks/useHtttpResponse";
 
 
 const AddDatabase = ({isOpenAddDbForm}) => {
@@ -44,8 +44,8 @@ const AddDatabase = ({isOpenAddDbForm}) => {
     const dispatch = useDispatch()
 
 
-    useEffect(()=>{
-        if(!isOpenAddDbForm){
+    useEffect(() => {
+        if (!isOpenAddDbForm) {
             resetStatus()
             form.resetFields()
         }
@@ -54,7 +54,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
 
     const onFinish = (values) => {
 
-        if(isNaN(values.port)){
+        if (isNaN(values.port)) {
             form.setFields([
                 {
                     name: "port", // required
@@ -63,22 +63,23 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                 },
             ]);
             return;
+        }
 
-        } else if(values.port.toString().length !== 4){
+        if (values.port.toString().length < 4 || values.port.toString().length > 5) {
             form.setFields([
                 {
                     name: "port", // required
                     value: values.port,//optional
-                    errors: ["Port should be 4 digit"],
+                    errors: ["Port should be 4 or 5 digit"],
                 },
             ]);
             return;
         }
 
 
-        let payload  = {
+        let payload = {
             ...updateItem,
-            alias: values.host + ":" + values.port,
+            alias: values.alias ? values.alias : values.host + ":" + values.port,
             host: values.host,
             port: Number(values.port),
             username: values.username || "",
@@ -88,9 +89,9 @@ const AddDatabase = ({isOpenAddDbForm}) => {
 
         setStatus(true, "", false)
 
-        if(!updateDatabaseId){
-            axios.post("/databases", payload).then(({status, data})=>{
-                if(status === 201){
+        if (!updateDatabaseId) {
+            axios.post("/databases", payload).then(({status, data}) => {
+                if (status === 201) {
                     dispatch({
                         type: ActionTypes.ADD_DATABASE,
                         payload: data
@@ -98,15 +99,15 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     // close add database form
                     dispatch({type: ActionTypes.CLOSE_ADD_DB_FORM})
                 }
-            }).catch(ex=>{
+            }).catch(ex => {
                 setStatus(false, ex.message, false)
-            }).finally(()=>{
-                setStatus(false, "", false)
+            }).finally(() => {
+                setStatus(false, undefined, false)
             })
 
-        } else{
-            axios.put("/databases/"+updateDatabaseId, payload).then(({status, data})=>{
-                if(status === 201){
+        } else {
+            axios.put("/databases/" + updateDatabaseId, payload).then(({status, data}) => {
+                if (status === 201) {
 
                     dispatch({
                         type: ActionTypes.UPDATE_DATABASE,
@@ -118,10 +119,10 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     // close add database form
                     dispatch({type: ActionTypes.CLOSE_ADD_DB_FORM})
                 }
-            }).catch(err=>{
+            }).catch(err => {
                 setStatus(false, err.message, false)
-            }).finally(()=>{
-                setStatus(false, "", false)
+            }).finally(() => {
+                setStatus(false, undefined, false)
             })
         }
     };
@@ -130,13 +131,44 @@ const AddDatabase = ({isOpenAddDbForm}) => {
         setStatus(false, "", false)
     }
 
+    function handleTestConnection(e) {
+
+        e.preventDefault();
+
+        let host = form.getFieldValue("host")
+        let port = form.getFieldValue("port")
+        let username = form.getFieldValue("username")
+        let pass = form.getFieldValue("password")
+        let timeout = form.getFieldValue("timeout")
+
+        if (!(host && port)) {
+            return message.error("Please provide host and port number")
+        }
+        setStatus(true, "", false)
+
+
+        axios.post(`/databases/test-connection`, {
+            host,
+            port,
+            timeout,
+            password: pass,
+            username
+
+        }).then(({data, status}) => {
+            setStatus(false, "Database connected", true)
+
+        }).catch(ex => {
+            let message = ex?.response?.data?.message || "Database connection fail"
+            setStatus(false, message, false)
+        })
+    }
+
 
     return (
         <div>
 
-            <h3 className="page-title"
-                style={{marginBottom: "20px"}}>{updateDatabaseId ? "Update Database" : "Add New Database"}</h3>
-
+            <h2 className="page-title"
+                style={{marginBottom: "20px"}}>{updateDatabaseId ? "Update Database" : "Add New Database"}</h2>
 
             <HttpResponse status={status} />
 
@@ -175,7 +207,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     <InputNumber className="custom-input"/>
                 </Form.Item>
 
-                { updateDatabaseId ? (
+                {updateDatabaseId ? (
                     <Form.Item
                         label="Database Alias*"
                         name="alias"
@@ -189,7 +221,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     >
                         <Input className="custom-input"/>
                     </Form.Item>
-                ) : null }
+                ) : null}
 
 
                 <Form.Item
@@ -213,7 +245,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                 <Form.Item
                     label="Timeout (s)"
                     name="timeout"
-                    initialValue={3000}
+                    initialValue={30000}
                     className="custom-input"
                 >
                     <InputNumber className="custom-input"/>
@@ -221,16 +253,21 @@ const AddDatabase = ({isOpenAddDbForm}) => {
 
                 <Form.Item>
                     <div className="flex justify-between ">
-                        {!updateDatabaseId && <button className="default_button" type="primary" htmlType="button">
+                        <button className="default_button" type="primary" htmlType="button"
+                                onClick={(e) => handleTestConnection(e)}>
                             Test Connection
-                        </button>}
+                        </button>
                         <div style={{columnGap: "10px"}} className="flex items-center">
                             <button className="default_button" type="primary" htmlType="button"
-                                    onClick={() => { resetStatus(); dispatch(toggleOpenDbForm())}}>
+                                    onClick={() => {
+                                        resetStatus();
+                                        dispatch(toggleOpenDbForm())
+                                    }}>
                                 Cancel
                             </button>
-                            <button disabled={status.isLoading} className="default_button " type="primary" htmlType="submit">
-                                { updateDatabaseId ? "Update Database" : "Add Database" }
+                            <button disabled={status.isLoading} className="default_button " type="primary"
+                                    htmlType="submit">
+                                {updateDatabaseId ? "Update Database" : "Add Database"}
                             </button>
                         </div>
                     </div>

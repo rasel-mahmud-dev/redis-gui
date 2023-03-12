@@ -86,30 +86,24 @@ $primary-400: #062539;
     }
 }
 
-.db-list-row{
-    display: flex;
-    column-gap: 20px;
 
-    @include getDown(768px){
-        flex-direction: column;
+.add-database-modal {
+    .ant-modal-content{
+        border-radius: 8px !important;
     }
-
-
-    .db-list{}
-    .add-db-form{
-        border: 1px solid rgba(6, 37, 57, 0.14);
+    .add-db-form {
+        //border: 1px solid rgba(6, 37, 57, 0.14);
         max-width: 500px;
         width: 0;
         opacity: 0;
         transition: width .4s ease, opacity 1s;
-        border-radius: 10px;
-        padding: 20px;
         box-sizing: border-box;
-        @include getDown(768px){
+        @include getDown(768px) {
             max-width: 100%;
         }
-        &.open{
-           width: 100%;
+
+        &.open {
+            width: 100%;
             opacity: 1;
         }
     }
@@ -189,8 +183,11 @@ $primary-400: #062539;
 
 .http-response{
     border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 20px;
     &.error-message{
-        background: red;
+        background: rgba(229, 36, 36, 0.83);
+        color: white;
     }
     &.success-message{
         background: #769ffc;

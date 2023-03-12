@@ -1,5 +1,7 @@
 const Database = require("../models/Database");
-const redisConnections = require("../utils/redisConnections")
+
+const {testRedisConnections, redisConnections} = require("../utils/redisConnections");
+const parseRedisDatabaseInfo = require("../utils/parseRedisDatabaseInfo");
 
 const redisClient = {}
 
@@ -101,9 +103,7 @@ exports.connectDatabase = async (req, res, next) => {
     const {databaseId} = req.params
     try {
         let client = await redisConnections(databaseId)
-        client.SET("test", "test data")
         if (client) {
-
             Database.findOneAndUpdate(
                     {_id: databaseId},
                     {$set: { lastConnection: new Date() }}
@@ -111,15 +111,33 @@ exports.connectDatabase = async (req, res, next) => {
             .then(()=>{})
             .catch(()=>{})
 
+            let keys = await client.DBSIZE()
+            let infoStr = await client.info()
+            let info  = parseRedisDatabaseInfo(infoStr, [
+                "connected_clients:",
+                "used_memory:",
+                "used_cpu_sys:",
+            ])
+
             res.status(201).json({
                 message: "Redis database connected",
-                databaseId: databaseId
+                databaseId: databaseId,
+                slats: {
+                    memoryUsage: (Number(info["used_memory"]) / 1024).toFixed(3)  || 0,
+                    cpuUsage: Number(info["used_cpu_sys"]).toFixed(2) || 0,
+                    totalKeys: keys,
+                    connectedClients: info["connected_clients"] || 0
+                }
             })
+        } else{
+            next("database connection fail.")
         }
     } catch (ex) {
         next("database connection fail.")
     }
 }
+
+
 
 // get string value
 exports.getStringValue = async (req, res, next) => {
@@ -148,7 +166,6 @@ exports.createStringValue = async (req, res, next) => {
     try {
         let client = await redisConnections(databaseId, redisClient)
         let result = await client.SET(key, value)
-        console.log(result)
         res.status(201).json({success: "ok"})
     } catch (ex) {
         next(ex)
@@ -230,7 +247,6 @@ exports.getKeys = async (req, res, next) => {
         let result = await client.keys("*")
         let output = []
 
-
         if (result && Array.isArray(result) && result.length > 0) {
             result.forEach((item, idx) => {
 
@@ -260,6 +276,26 @@ exports.getKeys = async (req, res, next) => {
         }
 
     } catch (ex) {
+        next(ex)
+    }
+}
+
+
+// test connection
+exports.testConnectDatabase = async (req, res, next) => {
+    const { port, host, username, password, timeout } = req.body
+    try {
+        let client = await testRedisConnections({
+            port, host, username, password, timeout
+        })
+        if(client){
+            res.status(200).json({message: "Database connected"})
+        } else{
+            res.status(500).json({message: "Database connection fail"})
+        }
+
+    } catch (ex) {
+        console.log(ex)
         next(ex)
     }
 }
