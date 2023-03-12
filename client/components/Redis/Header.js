@@ -1,8 +1,14 @@
 import React from 'react';
-import {Col, Row} from "antd";
+import {Avatar, Col, Dropdown, Menu, Row, Space} from "antd";
 import Link from "next/link";
+import AuthDropdown from "./AuthDropdown";
+import {FaSignInAlt} from "react-icons/fa";
+import {useSelector} from "react-redux";
 
 const Header = () => {
+
+    const {isAuthenticated, user} = useSelector(state => state.auth)
+
     return (
 
         <div className="top-bar">
@@ -14,7 +20,21 @@ const Header = () => {
                     </Link>
                 </Col>
                 <Col span={12} className="flex-right">
-                    <h3 className="page-title">Redis DB</h3>
+                    <div className="flex items-center gap-x-2">
+                        <h3 className="page-title">Redis DB</h3>
+                        {isAuthenticated ? (
+                            <AuthDropdown username={user?.username}>
+                                <Avatar/>
+                            </AuthDropdown>
+                        ) : (
+                            <Link href="/login">
+                                <button className="default_button flex items-center gap-x-2 ">
+                                    <span>Login</span>
+                                    <FaSignInAlt/>
+                                </button>
+                            </Link>
+                        )}
+                    </div>
                 </Col>
             </Row>
 

@@ -8,7 +8,7 @@ const redisClient = {}
 // get all saved databases
 exports.getAllDatabases = async (req, res, next) => {
     try {
-        const dbList = await Database.find()
+        const dbList = await Database.find({userId: req.userId})
         res.status(200).json(dbList)
     } catch (ex) {
         next(ex)
@@ -38,7 +38,7 @@ exports.createDatabase = async (req, res, next) => {
             port: Number(port),
             username,
             password,
-            userId: "6409bac9162ddd7b5c7030ce"
+            userId: req.userId
         })
         newConnection = await newConnection.save()
         res.status(201).json(newConnection)
@@ -57,7 +57,7 @@ exports.updateDatabase = async (req, res, next) => {
 
     try {
         let result = await Database.findOneAndUpdate(
-            {_id: databaseId},
+            {_id: databaseId, userId: req.userId},
             {
                 $set: {
                     alias: title,
@@ -85,7 +85,7 @@ exports.deleteDatabase = async (req, res, next) => {
     const {databaseId} = req.params
 
     try {
-        let result = await Database.deleteOne({_id: databaseId})
+        let result = await Database.deleteOne({_id: databaseId, userId: req.userId})
         if (result && result.deletedCount) {
             res.status(201).json({message: "ok"})
         } else {
@@ -105,7 +105,7 @@ exports.connectDatabase = async (req, res, next) => {
         let client = await redisConnections(databaseId)
         if (client) {
             Database.findOneAndUpdate(
-                    {_id: databaseId},
+                    {_id: databaseId, userId: req.userId},
                     {$set: { lastConnection: new Date() }}
             )
             .then(()=>{})

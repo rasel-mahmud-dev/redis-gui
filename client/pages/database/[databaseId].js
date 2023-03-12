@@ -40,6 +40,9 @@ const Database = () => {
 
     const [selectedDatabase, setSelectedDatabase] = useState(null)
     const {databases, connectedDatabaseId} = useSelector((state) => state.redisTools)
+    const {user} = useSelector((state) => state.auth)
+
+
 
     const [isShowErrorMessage, setShowErrorMessage] = useState(false)
 
@@ -307,7 +310,7 @@ const Database = () => {
 
                     </Col>
                     <Col span={12} className="flex-right">
-                        <DatabaseSlats meta={data}/>
+                        <DatabaseSlats meta={data} username={user?.username}/>
                     </Col>
                 </Row>
                 <div className="top-bar-space"></div>

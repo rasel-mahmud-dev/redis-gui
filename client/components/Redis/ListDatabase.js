@@ -7,7 +7,7 @@ import ActionTypes from "../../store/actionTypes";
 import  {useRouter} from "next/router";
 import axios from "axios";
 
-const ListDatabase = () => {
+const ListDatabase = ({isLoaded}) => {
 
     const router  = useRouter()
 
@@ -136,7 +136,7 @@ const ListDatabase = () => {
 
         <div className="db-list w-full">
             <Table
-                loading={(!data || data.length === 0) }
+                loading={!isLoaded}
                 rowSelection={{
                     type: selectionType,
                     ...rowSelection,

@@ -12,7 +12,9 @@ app.use(cors())
 
 const mongoose = require("mongoose");
 const routes = require("./routes");
+const authRoute = require("./routes/authRoute");
 
+app.use(authRoute)
 app.use(routes)
 
 
@@ -22,10 +24,18 @@ app.get("/", (req, res)=>{
 
 
 app.use((err, req, res, next)=>{
-    let status = err.status || 500
+
+    let status = err?.status || 500
+
+    let message = "Internal Error"
+    if(typeof err === "string"){
+        message = err
+    } else if(err.message && typeof err.message === "string"){
+        message = err.message
+    }
 
     res.status(status).json({
-        message: err.message || "Internal Error"
+        message: message
     })
 })
 

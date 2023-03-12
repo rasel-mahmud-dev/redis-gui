@@ -8,7 +8,7 @@ export function toggleOpenDbForm(){
 }
 
 
-export const fetchDatabases  = () => async (dispatch)=>{
+export const fetchDatabases  = (cb) => async (dispatch)=>{
     try{
         let {data, status}  = await axios.get("/databases")
         if(status === 200){
@@ -16,9 +16,11 @@ export const fetchDatabases  = () => async (dispatch)=>{
                 type: ActionTypes.FETCH_DATABASES,
                 payload: data
             })
+
+            cb(null)
         }
     } catch (ex){
-
+        cb(ex)
     }
 
 }

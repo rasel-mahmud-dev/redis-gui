@@ -1,6 +1,6 @@
 import React from 'react';
 
-const cd  = () => {
+const HashVal  = () => {
     return (
         <div>
 

@@ -1,10 +1,11 @@
 import React from 'react';
-import {Tooltip} from "antd";
+import {Avatar, Tooltip} from "antd";
 import {MdMemory} from "react-icons/md";
 import {BiKey, BiUser} from "react-icons/bi";
 import {FaEllipsisV} from "react-icons/fa";
+import AuthDropdown from "../AuthDropdown";
 
-const DatabaseSlats = ({meta}) => {
+const DatabaseSlats = ({meta, username}) => {
 
     const {
         memoryUsage,
@@ -47,6 +48,11 @@ const DatabaseSlats = ({meta}) => {
 
             <li className="flex items-center gap-x-2">
                 <FaEllipsisV/>
+            </li>
+            <li className="">
+                <AuthDropdown username={username}>
+                    <Avatar/>
+                </AuthDropdown>
             </li>
         </ul>
 

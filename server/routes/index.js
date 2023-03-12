@@ -4,52 +4,53 @@ const {getAllDatabases, createDatabase, connectDatabase, getStringValue, createS
 } =  require("../controllers");
 
 const express = require("express");
+const isAuth = require("../middlewares/isAuth");
 
 
 const router = express.Router()
 
 
-router.get("/api/databases", getAllDatabases)
-router.get("/api/databases/:databaseId", getDatabase)
-router.post("/api/databases", createDatabase)
-router.put("/api/databases/:databaseId", updateDatabase)
-router.get("/api/databases/:databaseId/connect", connectDatabase)
-router.delete("/api/databases/:databaseId", deleteDatabase)
+router.get("/api/databases",  isAuth, getAllDatabases)
+router.get("/api/databases/:databaseId", isAuth, getDatabase)
+router.post("/api/databases", isAuth, createDatabase)
+router.put("/api/databases/:databaseId", isAuth, updateDatabase)
+router.get("/api/databases/:databaseId/connect", isAuth, connectDatabase)
+router.delete("/api/databases/:databaseId",isAuth,  deleteDatabase)
 
 
 // perform with string datatype
-router.get("/api/databases/:databaseId/string", getStringValue)
-router.post("/api/databases/:databaseId/string", createStringValue)
-router.put("/api/databases/:databaseId/string", updateStringValue)
+router.get("/api/databases/:databaseId/string", isAuth,getStringValue)
+router.post("/api/databases/:databaseId/string", isAuth,createStringValue)
+router.put("/api/databases/:databaseId/string", isAuth,updateStringValue)
 
 
 
 
 
 // perform with list datatype
-router.get("/api/databases/:databaseId/list", getListValue)
-router.post("/api/databases/:databaseId/list/push", pushListElement)
-router.post("/api/databases/:databaseId/list/delete", deleteListElement)
-router.post("/api/databases/:databaseId/list", createListValue)
-router.put("/api/databases/:databaseId/list", updateListElement)
+router.get("/api/databases/:databaseId/list", isAuth, getListValue)
+router.post("/api/databases/:databaseId/list/push", isAuth, pushListElement)
+router.post("/api/databases/:databaseId/list/delete", isAuth, deleteListElement)
+router.post("/api/databases/:databaseId/list", isAuth, createListValue)
+router.put("/api/databases/:databaseId/list", isAuth, updateListElement)
 
 
 
 
 
 // delete keys
-router.post("/api/databases/:databaseId/keys/delete", deleteKeys)
+router.post("/api/databases/:databaseId/keys/delete", isAuth, deleteKeys)
 
 // update database key name
-router.put("/api/databases/:databaseId/key", updateKeyName)
+router.put("/api/databases/:databaseId/key", isAuth, updateKeyName)
 
 
 // get current database keys
-router.get("/api/databases/:databaseId/keys", getKeys)
+router.get("/api/databases/:databaseId/keys", isAuth, getKeys)
 
 
 // test connection
-router.post("/api/databases/test-connection", testConnectDatabase)
+router.post("/api/databases/test-connection", isAuth, testConnectDatabase)
 
 
 

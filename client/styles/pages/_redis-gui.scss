@@ -35,7 +35,7 @@ $primary-400: #062539;
     .top-bar {
         background: #ffffff;
         box-shadow: 0 2px 13px 0px #00000024;
-        z-index: 10000;
+        z-index: 1000;
         padding: 20px;
         position: fixed;
         top: 0;
@@ -293,3 +293,19 @@ $primary-400: #062539;
         }
     }
 }
+
+.login-form{
+    max-width: 500px;
+    margin: 100px auto;
+    background: white;
+    box-shadow: 0 2px 20px 2px rgba(114, 114, 114, 0.37);
+    border-radius: 10px;
+    padding: 20px;
+    h1{
+        text-align: center;
+        font-size: 25px;
+        font-weight: 800;
+        color: #001624;
+    }
+}
+

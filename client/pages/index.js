@@ -10,7 +10,7 @@ import ListDatabase from "../components/Redis/ListDatabase";
 
 import RedisToolsLayout from "../layout/RedisToolsLayout"
 import ActionTypes from "../store/actionTypes";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import Header from "../components/Redis/Header";
 
 const {Search} = Input;
@@ -20,10 +20,14 @@ export default function Home() {
     const dispatch = useDispatch()
 
 
-    const {isOpenAddDbForm} = useSelector(state => state.redisTools)
+    const {isOpenAddDbForm, databases} = useSelector(state => state.redisTools)
+    const [isLoaded, setLoaded] = useState(false)
 
     useEffect(() => {
-        dispatch(fetchDatabases())
+        setLoaded(false)
+        dispatch(fetchDatabases(function (err){
+            setLoaded(true)
+        }))
     }, [])
 
 
@@ -41,6 +45,7 @@ export default function Home() {
     }
 
 
+
     return (
         <RedisToolsLayout>
             <Head>
@@ -53,7 +58,7 @@ export default function Home() {
                 <Header/>
                 <div className="top-bar-space"></div>
 
-                <div className="" style={{marginLeft: "60px"}}>
+                <div className="" style={{marginLeft: "60px", marginTop: "10px"}}>
                     <div className="flex justify-between">
                         <div style={{margin: "10px"}}>
                             <button onClick={() => dispatch(toggleOpenDbForm())}
@@ -70,8 +75,10 @@ export default function Home() {
                     </div>
 
 
-                    <div style={{marginTop: "12px"}} className="">
-                        <ListDatabase/>
+                    <div style={{marginTop: "12px", minHeight: "500px"}} >
+
+                       <ListDatabase isLoaded={isLoaded}/>
+
 
                         <Modal className="add-database-modal" open={isOpenAddDbForm} footer={null} onCancel={closeAddDatabaseForm}>
                             <div className={`add-db-form ${isOpenAddDbForm ? "open" : "hide"}`}>

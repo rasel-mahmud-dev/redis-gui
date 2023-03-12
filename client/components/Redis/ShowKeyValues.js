@@ -7,6 +7,8 @@ import axios from "axios";
 
 import StringVal from "./Values/StringVal";
 import ListValue from "./Values/ListVal";
+import HashAdd from "./AddKey/HashAdd";
+
 
 
 const ShowKeyValues = (props) => {
@@ -60,7 +62,7 @@ const ShowKeyValues = (props) => {
 
     const mapAddKey = {
         string: StringVal,
-        // hash: HashAdd,
+        hash: HashAdd,
         list: ListValue,
     }
 
