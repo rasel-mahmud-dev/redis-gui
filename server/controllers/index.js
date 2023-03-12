@@ -376,3 +376,22 @@ exports.deleteListElement = async (req, res, next) => {
         next(ex)
     }
 }
+
+
+// update list of Element using index
+exports.updateListElement = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, index, value} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!value) return res.status(403).json({message: "Please provide element value"})
+    if ((index === undefined || index === "")) return res.status(403).json({message: "Please provide element index"})
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.lSet(key,  Number(index), value)
+        res.status(201).json({success: "ok"})
+    } catch (ex) {
+        next(ex)
+    }
+}

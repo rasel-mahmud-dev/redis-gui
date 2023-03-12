@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Button, Checkbox, Form, Input, InputNumber, message, Spin} from 'antd';
+import {Button, Checkbox, Form, Input, InputNumber, message, Spin} from 'antd';
 import {toggleOpenDbForm} from "../../actions/redisTools";
 import {useDispatch, useSelector} from "react-redux";
 import ActionTypes from "../../store/actionTypes";
@@ -170,7 +170,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
             <h2 className="page-title"
                 style={{marginBottom: "20px"}}>{updateDatabaseId ? "Update Database" : "Add New Database"}</h2>
 
-            <HttpResponse status={status} />
+            <HttpResponse status={status}/>
 
             <Form
                 form={form}
@@ -182,6 +182,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                 <Form.Item
                     label="Host*"
                     name="host"
+                    initialValue="127.0.0.1"
                     className="custom-input"
                     rules={[
                         {
@@ -190,12 +191,13 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                         },
                     ]}
                 >
-                    <Input className="custom-input"/>
+                    <Input className="custom-input"  placeholder="Host name"/>
                 </Form.Item>
 
                 <Form.Item
                     label="Port*"
                     name="port"
+                    initialValue={6379}
                     className="custom-input"
                     rules={[
                         {
@@ -204,7 +206,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                         }
                     ]}
                 >
-                    <InputNumber className="custom-input"/>
+                    <InputNumber className="custom-input"  placeholder="Port number"/>
                 </Form.Item>
 
                 {updateDatabaseId ? (
@@ -212,6 +214,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                         label="Database Alias*"
                         name="alias"
                         className="custom-input"
+                        initialValue="localhost-server"
                         rules={[
                             {
                                 required: true,
@@ -219,7 +222,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                             },
                         ]}
                     >
-                        <Input className="custom-input"/>
+                        <Input className="custom-input" placeholder="Database alias"/>
                     </Form.Item>
                 ) : null}
 
@@ -229,7 +232,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     name="username"
                     className="custom-input"
                 >
-                    <Input className="custom-input"/>
+                    <Input className="custom-input" placeholder="Database username"/>
                 </Form.Item>
 
 
@@ -237,8 +240,9 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     label="Password"
                     name="password"
                     className="custom-input"
+                    placeholder="Password"
                 >
-                    <Input className="custom-input"/>
+                    <Input className="custom-input" placeholder="Database password"/>
                 </Form.Item>
 
 
@@ -248,7 +252,7 @@ const AddDatabase = ({isOpenAddDbForm}) => {
                     initialValue={30000}
                     className="custom-input"
                 >
-                    <InputNumber className="custom-input"/>
+                    <InputNumber className="custom-input" placeholder="Timeout"/>
                 </Form.Item>
 
                 <Form.Item>

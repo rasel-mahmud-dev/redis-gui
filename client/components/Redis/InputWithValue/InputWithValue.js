@@ -4,7 +4,7 @@ import {BiCheck} from "react-icons/bi";
 import {TiTimes} from "react-icons/ti";
 
 
-const InputWithValue = ({defaultValue, handleOk, handleCancel, minRows = 2, maxRows = 10}) => {
+const InputWithValue = ({defaultValue, handleOk, handleCancel, stringMaxHeight, minRows = 2, maxRows = 10}) => {
 
     const [inputVal, setInputVal] = useState("")
     const [isEditAble, setEditAble] = useState(false)
@@ -30,7 +30,7 @@ const InputWithValue = ({defaultValue, handleOk, handleCancel, minRows = 2, maxR
                         </div>
                     </div>
                 </div>
-                : <div className="pointer pre-line break-all" onClick={() => setEditAble(true)}>{isEditAble ? inputVal : defaultValue }</div>}
+                : <div style={{maxHeight: stringMaxHeight}} className="overflow-y-auto pointer pre-line break-all" onClick={() => setEditAble(true)}>{isEditAble ? inputVal : defaultValue }</div>}
         </div>
     );
 };

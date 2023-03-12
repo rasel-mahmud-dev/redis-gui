@@ -36,7 +36,7 @@ const StringVal = ({databaseId, keyName}) => {
 
     return (
         <div>
-            <InputWithValue handleOk={handleOk} defaultValue={keyValue} as="textarea" maxRows={10} minRows={6} />
+            <InputWithValue handleOk={handleOk} defaultValue={keyValue} as="textarea" maxRows={10} minRows={6} stringMaxHeight={400} />
         </div>
     );
 };

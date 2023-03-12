@@ -22,7 +22,7 @@ import DatabaseSlats from "../../components/Redis/DatabaseSlats/DatabaseSlats";
 export const colors = {
     string: "#52c41a",
     hash: "#1890ff",
-    list: "#d9d9d9",
+    list: "#ff23ef",
     stream: "#faad14",
     json: "#ff4d4f",
 }
@@ -354,7 +354,7 @@ const Database = () => {
                                         <h4 style={{fontWeight: "600"}}>Last
                                             refresh: {moment().fromNow(lastRefresh)} </h4>
                                         <div className="square-icon outline" onClick={handleRefetchKeys}>
-                                            <BiRefresh size={20}/>
+                                            <BiRefresh size={16}/>
                                         </div>
                                     </div>
                                 </div>
