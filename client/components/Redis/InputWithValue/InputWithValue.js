@@ -4,10 +4,16 @@ import {BiCheck} from "react-icons/bi";
 import {TiTimes} from "react-icons/ti";
 
 
-const InputWithValue = ({defaultValue, handleOk, handleCancel, stringMaxHeight, minRows = 2, maxRows = 10}) => {
+const InputWithValue = ({defaultValue, isOpen, handleOk, handleCancel, stringMaxHeight, minRows = 2, maxRows = 10}) => {
 
     const [inputVal, setInputVal] = useState("")
     const [isEditAble, setEditAble] = useState(false)
+
+    useEffect(()=>{
+        if(isOpen){
+            setEditAble(true)
+        }
+    }, [isOpen])
 
     function done(){
         setEditAble(false)

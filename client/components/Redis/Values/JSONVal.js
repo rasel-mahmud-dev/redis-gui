@@ -1,19 +1,26 @@
 import React, {useEffect, useState} from 'react';
 import InputWithValue from "../InputWithValue/InputWithValue";
 import axios from "axios";
-import {message, Spin} from "antd";
+import {Input, message, Spin} from "antd";
 import moment from "moment/moment";
-import {BiPencil, BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
+import {BiCheck, BiPencil, BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
 import {handleDeleteKey} from "../../../actions/redisTools";
+import CodeEditor from "../../CodeEditor/CodeEditor";
+import {TiTimes} from "react-icons/ti";
 
 
-const StringVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
+const JsonVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
 
     const [keyValue, setKeyValue] = useState("")
     const [isLoading, setLoading] = useState(false)
     const [size, setSize] = useState(0)
     const [lastSyncDate, setLastSyncDate] = useState(new Date())
     const [isOpenEditForm, setOpenEditForm] = useState(false)
+
+
+    const [inputVal, setInputVal] = useState("")
+    const [isEditAble, setEditAble] = useState(false)
+
 
     useEffect(() => {
         getValueForKey(keyName)
@@ -33,22 +40,31 @@ const StringVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
         })
     }
 
-    function handleOk(newValue, done) {
-        axios.post(`/databases/${databaseId}/string`, {key: keyName, value: newValue}).then(({data, status}) => {
-            if (status === 201) {
-                setKeyValue(newValue)
-                done()
-            }
-        }).catch(ex => {
-            console.log(ex)
-        })
-    }
-
 
     function handleReSyncData() {
         getValueForKey(keyName)
     }
 
+
+    function updateJsonString(){
+
+        try{
+            JSON.stringify(inputVal)
+            axios.put(`/databases/${databaseId}/json`, {key: keyName, value: inputVal}).then(({data, status}) => {
+                if (status === 201) {
+                    setKeyValue(inputVal)
+                    setSize(data.memorySize)
+                }
+            }).catch(ex => {
+                console.log(ex)
+            })
+
+
+        } catch (ex){
+           return  message.error("Please provide valid data")
+        }
+
+    }
 
 
     return (
@@ -80,21 +96,41 @@ const StringVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
                                 </div>
 
                                 <button type="button" className="square-icon outline">
-                                    <BiTrash size={16} onClick={()=>handleDeleteKey(databaseId, keyName, onCloseShowValuePanel)}/>
+                                    <BiTrash size={16}
+                                             onClick={() => handleDeleteKey(databaseId, keyName, onCloseShowValuePanel)}/>
                                 </button>
 
 
                                 <button type="button" className="square-icon outline"
-                                        onClick={()=>setOpenEditForm(!isOpenEditForm)}
+                                        onClick={()=>setEditAble(true)}
                                 >
                                     <BiPencil/>
                                 </button>
                             </div>
 
                         </div>
-                        <InputWithValue isOpen={isOpenEditForm} handleOk={handleOk} defaultValue={keyValue} as="textarea" maxRows={10}
-                            minRows={6}
-                            stringMaxHeight={400}/>
+
+
+                        <div className="relative w-full">
+                            <div>
+                                <CodeEditor
+                                    editable={isEditAble}
+                                    data={keyValue}
+                                    setData={value => setInputVal(value)}
+                                />
+                                {isEditAble && (
+                                    <div className="absolute bottom-30 right-0 flex">
+                                        <div className="square-icon" onClick={updateJsonString}><BiCheck/></div>
+                                        <div className="square-icon"
+                                             onClick={() => setEditAble(false)}><TiTimes/>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+
+
                     </div>
                 )
 
@@ -107,4 +143,4 @@ const StringVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
     );
 };
 
-export default StringVal;
+export default JsonVal;

@@ -67,7 +67,6 @@ const Database = () => {
     const [showKey, setShowKey] = useState("")
 
 
-
     // fetch database and connect redis database from this database info
     useEffect(() => {
 
@@ -137,7 +136,7 @@ const Database = () => {
     }
 
     function handleChangeKeyName(oldName, newName) {
-        let updatedKeys = [...data.keys]
+        let updatedKeys = [...allKeys]
         let changeKeyIndex = updatedKeys.findIndex(key => key.key === oldName)
         if (changeKeyIndex !== -1) {
             updatedKeys[changeKeyIndex] = {
@@ -147,12 +146,7 @@ const Database = () => {
         }
 
         // update state
-        setData((prevState) => ({
-            ...prevState,
-            keys: updatedKeys
-        }))
-
-        console.log(updatedKeys)
+        setAllKeys(updatedKeys)
     }
 
     function handleCloseShowValue() {
@@ -188,6 +182,11 @@ const Database = () => {
         }).catch(ex => {
             console.log(ex)
         })
+    }
+
+    function removeKey(key){
+        setAllKeys(allKeys.filter(item => item.key !== key))
+        dispatch(decrementKeys())
     }
 
 
@@ -233,9 +232,9 @@ const Database = () => {
             title: 'Size',
             dataIndex: 'size',
             key: 'size',
-            render: (_) => (
+            render: (size) => (
                 <div>
-                    1KB
+                    {((size / 1024) || 0).toFixed(2)} KB
                 </div>
             )
         },
@@ -394,6 +393,7 @@ const Database = () => {
                             {/******** show redis key value *******/}
                             {isShowForm === "value" && <div className="card w-full">
                                 <ShowKeyValues
+                                    onCloseShowValuePanel={(key)=>{setShowForm(""); removeKey(key) }}
                                     onKeyNameChange={handleChangeKeyName}
                                     onCloseShowValue={handleCloseShowValue}
                                     showKey={showKey}

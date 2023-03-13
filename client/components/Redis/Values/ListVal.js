@@ -4,14 +4,15 @@ import {Input, message, Popconfirm, Select, Spin, Table} from "antd";
 import {BiCheck, BiPencil, BiPlus, BiRefresh, BiSync, BiTrash} from "react-icons/bi";
 import {TiTimes} from "react-icons/ti";
 import moment from "moment/moment";
+import {handleDeleteKey} from "../../../actions/redisTools";
 
 
-const ListValue = ({databaseId, keyName}) => {
+const ListValue = ({databaseId, keyName, onCloseShowValuePanel}) => {
 
     const [keyValue, setKeyValue] = useState([])
     const [isLoading, setLoading] = useState(false)
     const [lastSyncDate, setLastSyncDate] = useState(new Date())
-    const [size, setSize] = useState(200)
+    const [size, setSize] = useState(0)
 
     const [newElement, setNewElement] = useState({
         order: 1,
@@ -30,7 +31,8 @@ const ListValue = ({databaseId, keyName}) => {
         setLoading(true)
         axios.get(`/databases/${databaseId}/list?key=` + key,).then(({status, data}) => {
             if (status === 200) {
-                setKeyValue(data)
+                setKeyValue(data.values)
+                setSize(data.memorySize)
                 setLastSyncDate(new Date())
             }
         }).catch(ex => {
@@ -148,7 +150,7 @@ const ListValue = ({databaseId, keyName}) => {
                         <div className="flex justify-between gap-x-5 mb-4">
                             <div className="flex items-center gap-x-5">
                                 <div className=" outline">
-                                    {size} B
+                                    {((size / 1024) || 0).toFixed(2)} KB
                                 </div>
                                 <div className=" outline">
                                     Length: {keyValue.length}
@@ -164,6 +166,10 @@ const ListValue = ({databaseId, keyName}) => {
                                         <BiRefresh fontSize={16}/>
                                     </button>
                                 </div>
+
+                                <button type="button" className="square-icon outline">
+                                    <BiTrash size={16} onClick={()=>handleDeleteKey(databaseId, keyName, onCloseShowValuePanel)}/>
+                                </button>
 
                                 <button type="button" className="square-icon outline"
                                         onClick={handleAddElementField}>

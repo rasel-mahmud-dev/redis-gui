@@ -93,10 +93,17 @@ body{
 
     &.outline{
         background: transparent;
-        border: 1px solid rgba(6, 37, 57, 0.32);
+        border: 1px solid rgba(6, 37, 57, 0.12);
         &:hover{
             background: $primary-400 !important;
             color: white;
+            svg {
+                color: #0ac0a6;
+            }
+        }
+
+        svg{
+            color: #626262;
         }
     }
 

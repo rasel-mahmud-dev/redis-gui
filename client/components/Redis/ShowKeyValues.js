@@ -8,12 +8,13 @@ import axios from "axios";
 import StringVal from "./Values/StringVal";
 import ListValue from "./Values/ListVal";
 import HashVal from "./Values/HashVal";
+import JsonVal from "./Values/JSONVal";
 
 
 
 const ShowKeyValues = (props) => {
 
-    const { connectedDatabaseId, databaseId, onCloseShowValue, showKey, selectType, onKeyNameChange } = props
+    const { connectedDatabaseId, onCloseShowValuePanel, databaseId, onCloseShowValue, showKey, selectType, onKeyNameChange } = props
 
     const [keyState, setKeyState] = useState({
         isEditAble: false,
@@ -65,6 +66,7 @@ const ShowKeyValues = (props) => {
         string: StringVal,
         hash: HashVal,
         list: ListValue,
+        json: JsonVal,
     }
 
     const Component = mapAddKey[selectType]
@@ -99,7 +101,7 @@ const ShowKeyValues = (props) => {
 
             {/***** key content ******/}
            <div className="mt-4">
-               <Component databaseId={databaseId} keyName={showKey} />
+               <Component onCloseShowValuePanel={onCloseShowValuePanel} databaseId={databaseId} keyName={showKey} />
            </div>
 
         </div>

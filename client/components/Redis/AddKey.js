@@ -2,6 +2,7 @@ import React from 'react';
 import HashAdd from "./AddKey/HashAdd";
 import StringAdd from "./AddKey/StringAdd";
 import ListAdd from "./AddKey/ListAdd";
+import JSONAdd from "./AddKey/JSONAdd";
 
 
 
@@ -16,11 +17,11 @@ const AddKey = ({dataType, dataKeys, databaseId, setAllkeysData, doneAddKey}) =>
         string: StringAdd,
         hash: HashAdd,
         list: ListAdd,
+        json: JSONAdd,
     }
 
     const Component = mapAddKey[dataType]
 
-    console.log(dataKeys)
 
     return (
         <div>

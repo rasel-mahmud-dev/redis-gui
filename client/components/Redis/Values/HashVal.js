@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import moment from "moment";
-import {BiCheck, BiPencil, BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
-import {Input, Select, Spin} from "antd";
-import {TiTimes} from "react-icons/ti";
+import { BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
+import { Spin} from "antd";
 import HashValueTable from "../CustomTable/HashValueTable";
+import {handleDeleteKey} from "../../../actions/redisTools";
 
-const HashVal = ({databaseId, keyName}) => {
+const HashVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
 
     const [hashValues, setHashValues] = useState({})
     const [isLoading, setLoading] = useState(false)
@@ -31,7 +31,8 @@ const HashVal = ({databaseId, keyName}) => {
         setLoading(true)
         axios.get(`/databases/${databaseId}/hash?key=` + key,).then(({status, data}) => {
             if (status === 200) {
-                setHashValues(data)
+                setHashValues(data.values)
+                setSize(data.memorySize)
                 setLastSyncDate(new Date())
             }
         }).catch(ex => {
@@ -80,7 +81,7 @@ const HashVal = ({databaseId, keyName}) => {
     function handleDeleteElement(hashKey) {
         axios.post(`/databases/${databaseId}/hash/delete`, {
             key: keyName,
-            hashKey: keyName,
+            hashKey: hashKey,
 
         }).then(({data, status}) => {
             if (status === 201) {
@@ -140,7 +141,7 @@ const HashVal = ({databaseId, keyName}) => {
                     <div className="flex justify-between gap-x-5 mb-4">
                         <div className="flex items-center gap-x-5">
                             <div className=" outline">
-                                {size} B
+                                {((size / 1024) || 0).toFixed(2)} KB
                             </div>
                             <div className=" outline">
                                 Length: {Object.keys(hashValues).length}
@@ -156,6 +157,10 @@ const HashVal = ({databaseId, keyName}) => {
                                     <BiRefresh fontSize={16}/>
                                 </button>
                             </div>
+
+                            <button type="button" className="square-icon outline">
+                                <BiTrash size={16} onClick={()=>handleDeleteKey(databaseId, keyName, onCloseShowValuePanel)}/>
+                            </button>
 
                             <button type="button" className="square-icon outline"
                                     onClick={handleToggleNewHashKeyForm}>

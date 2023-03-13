@@ -8,7 +8,6 @@ export function toggleOpenDbForm() {
     }
 }
 
-
 export const fetchDatabases = (cb) => async (dispatch) => {
     try {
         let {data, status} = await axios.get("/databases")
@@ -25,8 +24,6 @@ export const fetchDatabases = (cb) => async (dispatch) => {
     }
 }
 
-
-
 export const incrementKeys = () => {
     let {redisTools} = store.getState()
     if(redisTools && redisTools.connectedDbMeta){
@@ -40,7 +37,6 @@ export const incrementKeys = () => {
     }
 }
 
-
 export const decrementKeys = () => {
     let {redisTools} = store.getState()
     if(redisTools && redisTools.connectedDbMeta){
@@ -52,4 +48,14 @@ export const decrementKeys = () => {
             }
         }
     }
+}
+
+export function handleDeleteKey(databaseId, keyName, done){
+    axios.post(`/databases/${databaseId}/keys/delete`, {keys: [keyName]}).then(({data, status}) => {
+        if (status === 201) {
+            done(keyName)
+        }
+    }).catch(ex => {
+        let msg = ex;
+    })
 }
