@@ -105,15 +105,17 @@ exports.connectDatabase = async (req, res, next) => {
         let client = await redisConnections(databaseId)
         if (client) {
             Database.findOneAndUpdate(
-                    {_id: databaseId, userId: req.userId},
-                    {$set: { lastConnection: new Date() }}
+                {_id: databaseId, userId: req.userId},
+                {$set: {lastConnection: new Date()}}
             )
-            .then(()=>{})
-            .catch(()=>{})
+                .then(() => {
+                })
+                .catch(() => {
+                })
 
             let keys = await client.DBSIZE()
             let infoStr = await client.info()
-            let info  = parseRedisDatabaseInfo(infoStr, [
+            let info = parseRedisDatabaseInfo(infoStr, [
                 "connected_clients:",
                 "used_memory:",
                 "used_cpu_sys:",
@@ -122,21 +124,20 @@ exports.connectDatabase = async (req, res, next) => {
             res.status(201).json({
                 message: "Redis database connected",
                 databaseId: databaseId,
-                slats: {
-                    memoryUsage: (Number(info["used_memory"]) / 1024).toFixed(3)  || 0,
+                connectedDbMeta: {
+                    memoryUsage: (Number(info["used_memory"]) / 1024).toFixed(3) || 0,
                     cpuUsage: Number(info["used_cpu_sys"]).toFixed(2) || 0,
                     totalKeys: keys,
                     connectedClients: info["connected_clients"] || 0
                 }
             })
-        } else{
+        } else {
             next("database connection fail.")
         }
     } catch (ex) {
         next("database connection fail.")
     }
 }
-
 
 
 // get string value
@@ -148,8 +149,9 @@ exports.getStringValue = async (req, res, next) => {
 
     try {
         let client = await redisConnections(databaseId)
+        let memorySize = await client.memoryUsage(key) || 0
         let value = await client.GET(key)
-        res.status(200).json(value)
+        res.status(200).json({value, memorySize})
     } catch (ex) {
         next(ex)
     }
@@ -200,7 +202,7 @@ exports.updateKeyName = async (req, res, next) => {
 
     try {
         let client = await redisConnections(databaseId, redisClient)
-        let result = await client.RENAME (oldKey, newName)
+        let result = await client.RENAME(oldKey, newName)
         res.status(201).json({success: "ok"})
     } catch (ex) {
         next(ex)
@@ -237,7 +239,7 @@ exports.deleteKeys = async (req, res, next) => {
 // delete string value
 exports.getKeys = async (req, res, next) => {
 
-    const { databaseId } = req.params
+    const {databaseId} = req.params
 
     if (!databaseId) return res.status(403).json({message: "Please provide database id"})
 
@@ -251,28 +253,22 @@ exports.getKeys = async (req, res, next) => {
             result.forEach((item, idx) => {
 
                 (async function () {
-
                     let dataType = await client.type(item)
+                    let size = await client.memoryUsage(item)
                     output.push({
                         key: item,
-                        size: 1,
+                        size: size,
                         dataType
                     })
 
                     if (idx + 1 === result.length) {
-                        res.status(200).json({
-                            total: result.length,
-                            keys: output
-                        })
+                        res.status(200).json(output)
                     }
                 }())
 
             })
-        } else{
-            res.status(200).json({
-                total: 0,
-                keys: output
-            })
+        } else {
+            res.status(200).json(output)
         }
 
     } catch (ex) {
@@ -283,14 +279,14 @@ exports.getKeys = async (req, res, next) => {
 
 // test connection
 exports.testConnectDatabase = async (req, res, next) => {
-    const { port, host, username, password, timeout } = req.body
+    const {port, host, username, password, timeout} = req.body
     try {
         let client = await testRedisConnections({
             port, host, username, password, timeout
         })
-        if(client){
+        if (client) {
             res.status(200).json({message: "Database connected"})
-        } else{
+        } else {
             res.status(500).json({message: "Database connection fail"})
         }
 
@@ -301,8 +297,7 @@ exports.testConnectDatabase = async (req, res, next) => {
 }
 
 
-
-
+/************ Perform with list value data type **********/
 // get list value
 exports.getListValue = async (req, res, next) => {
     const {databaseId} = req.params
@@ -312,8 +307,10 @@ exports.getListValue = async (req, res, next) => {
 
     try {
         let client = await redisConnections(databaseId)
+        let memorySize = await client.memoryUsage(key) || 0
+
         let values = await client.lRange(key, 0, -1) // get all list values
-        res.status(200).json(values)
+        res.status(200).json({values, memorySize})
     } catch (ex) {
         next(ex)
     }
@@ -347,9 +344,9 @@ exports.pushListElement = async (req, res, next) => {
     try {
         let client = await redisConnections(databaseId, redisClient)
         let result;
-        if(order === 0){
+        if (order === 0) {
             result = await client.lPush(key, value)
-        } else if(order === 1){
+        } else if (order === 1) {
             result = await client.rPush(key, value)
         }
 
@@ -369,7 +366,7 @@ exports.deleteListElement = async (req, res, next) => {
 
     try {
         let client = await redisConnections(databaseId, redisClient)
-        let result = await client.lRem(key,  1, value)
+        let result = await client.lRem(key, 1, value)
         console.log(result)
         res.status(201).json({success: "ok"})
     } catch (ex) {
@@ -389,9 +386,187 @@ exports.updateListElement = async (req, res, next) => {
 
     try {
         let client = await redisConnections(databaseId, redisClient)
-        let result = await client.lSet(key,  Number(index), value)
+        let result = await client.lSet(key, Number(index), value)
         res.status(201).json({success: "ok"})
     } catch (ex) {
         next(ex)
     }
 }
+
+
+/************ Perform with hash value data type **********/
+
+// get list value
+exports.getHashValues = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key} = req.query
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+
+    try {
+        let client = await redisConnections(databaseId)
+
+        let memorySize = await client.memoryUsage(key) || 0
+
+        let values = await client.hGetAll(key) // get all hash key & values
+        res.status(200).json({values, memorySize})
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+
+// insert hash value
+exports.insertHashValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, values} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!values && !Array.isArray(values)) return res.status(403).json({message: "Please provide hashValues"})
+
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        values?.forEach((item, index) => {
+            (async function () {
+                client.hSet(key, item.field, item.value)
+                    .then(() => {
+                        //  end of loop
+                        if ((index + 1) === values.length) {
+                            res.status(201).json({success: "ok"})
+                        }
+                    })
+                    .catch(ex => {
+                        //  end of loop
+                        if ((index + 1) === values.length) {
+                            next("Hash value insert fail")
+                        }
+                    })
+
+            }())
+
+        })
+
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+
+// delete hash key
+exports.deleteHashKey = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, hashKey} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+
+    try {
+        let client = await redisConnections(databaseId)
+        let result = await client.hDel(key, hashKey) // get all hash key & values
+        res.status(201).json({success: "ok"})
+
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+// set hash key-value
+exports.setHashKeyValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, hashKey, value} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!hashKey) return res.status(403).json({message: "Please provide hash key"})
+    if (!value) return res.status(403).json({message: "Please provide hash value"})
+
+
+    try {
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.hDel(key, hashKey)
+        result = await client.hSet(key, hashKey, value)
+        if (result) {
+            res.status(201).json({
+                message: "Key added"
+            })
+
+        } else {
+            next("This Key is already exists")
+        }
+
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+
+
+
+// ***************** Perform with json data type *******************
+
+// get json value
+exports.getJSONValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key} = req.query
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+
+    try {
+        let client = await redisConnections(databaseId)
+
+        let memorySize = await client.memoryUsage(key) || 0
+
+        let values = await client.hGetAll(key) // get all hash key & values
+        res.status(200).json({values, memorySize})
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+
+// create new database
+exports.insertJSONValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, value} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!value) return res.status(403).json({message: "Please provide json value"})
+
+
+    try {
+        // insert as string
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.SET(key, value)
+        if(result){
+            let memorySize = await client.memoryUsage(key) || 0
+            res.status(201).json({success: "ok", memorySize})
+        }
+
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+
+// create new database
+exports.updateJSONValue = async (req, res, next) => {
+    const {databaseId} = req.params
+    const {key, value} = req.body
+
+    if (!key) return res.status(403).json({message: "Please provide key"})
+    if (!value) return res.status(403).json({message: "Please provide json value"})
+
+
+    try {
+        // insert as string
+        let client = await redisConnections(databaseId, redisClient)
+        let result = await client.SET(key, value)
+        if(result){
+            let memorySize = await client.memoryUsage(key) || 0
+            res.status(201).json({success: "ok", memorySize})
+        }
+
+    } catch (ex) {
+        next(ex)
+    }
+}
+
