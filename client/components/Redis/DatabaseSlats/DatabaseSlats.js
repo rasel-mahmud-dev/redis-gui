@@ -10,7 +10,7 @@ const DatabaseSlats = ({meta, username}) => {
     const {
         memoryUsage,
         cpuUsage,
-        total,
+        totalKeys,
         connectedClients,
     }  = meta
 
@@ -32,9 +32,9 @@ const DatabaseSlats = ({meta, username}) => {
             </li>
 
             <li className="">
-                <Tooltip title={`Keys ${total}`} className="flex items-center gap-x-2">
+                <Tooltip title={`Keys ${totalKeys}`} className="flex items-center gap-x-2">
                     <BiKey/>
-                    <span>{total}</span>
+                    <span>{totalKeys}</span>
                 </Tooltip>
             </li>
 

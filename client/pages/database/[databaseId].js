@@ -16,7 +16,9 @@ import ActionTypes from "../../store/actionTypes";
 import ShowKeyValues from "../../components/Redis/ShowKeyValues";
 import moment from "moment";
 import MySelect from "../../components/Redis/MySelect/MySelect";
-import DatabaseSlats from "../../components/Redis/DatabaseSlats/DatabaseSlats";
+import TopBarMeta from "../../components/Redis/TopBarMeta";
+
+import {decrementKeys, incrementKeys} from "../../actions/redisTools"
 
 
 export const colors = {
@@ -38,11 +40,8 @@ export const types = [
 
 const Database = () => {
 
-    const [selectedDatabase, setSelectedDatabase] = useState(null)
-    const {databases, connectedDatabaseId} = useSelector((state) => state.redisTools)
+    const { currentSelectedDb, connectedDatabaseId, connectedDbMeta } = useSelector((state) => state.redisTools)
     const {user} = useSelector((state) => state.auth)
-
-
 
     const [isShowErrorMessage, setShowErrorMessage] = useState(false)
 
@@ -50,15 +49,9 @@ const Database = () => {
     const [selectType, setSelectType] = useState("string")
     const [lastRefresh, setLastRefresh] = useState(new Date())
 
-    const [data, setData] = useState({
-        keys: [],  // {key: "name", dataType: "string", size: "104 B"}[],
-        total: 0,
-        memoryUsage: 0,
-        cpuUsage: 0,
-        totalKeys: 0,
-        connectedClients: 0,
 
-    })
+    // {key: "name", dataType: "string", size: "104 B"}[],
+    const [allKeys, setAllKeys] = useState([])
 
     const [isDatabaseConnectionFail, setDatabaseConnectionFail] = useState(false)
 
@@ -74,17 +67,18 @@ const Database = () => {
     const [showKey, setShowKey] = useState("")
 
 
-    function handleGoBack() {
-        router.push("/")
-    }
 
     // fetch database and connect redis database from this database info
     useEffect(() => {
 
         if (databaseId) {
+
             axios.get("/databases/" + databaseId).then(({status, data: data2}) => {
                 if (status === 200) {
-                    setSelectedDatabase(data2)
+                    dispatch({
+                        type: ActionTypes.SET_CURRENT_SELECTED_DB,
+                        payload: data2
+                    })
 
                     //  connect redis database
                     axios.get(`/databases/${databaseId}/connect`).then(({status, data: responseData}) => {
@@ -92,17 +86,11 @@ const Database = () => {
                             // redis database connected
                             dispatch({
                                 type: ActionTypes.SET_ACTIVE_DATABASE_CONNECTION,
-                                payload: responseData.databaseId
+                                payload: {
+                                    databaseId: responseData.databaseId,
+                                    connectedDbMeta:  responseData.connectedDbMeta,
+                                }
                             })
-
-
-                            setData((prev) => ({
-                                ...prev,
-                                memoryUsage: responseData.slats.memoryUsage,
-                                cpuUsage: responseData.slats.cpuUsage,
-                                connectedClients: responseData.slats.connectedClients,
-                                total: responseData.slats.totalKeys
-                            }))
                         } else {
                             setDatabaseConnectionFail(true)
                         }
@@ -129,10 +117,7 @@ const Database = () => {
             axios.get(`/databases/${connectedDatabaseId}/keys`).then(({data, status}) => {
                 if (status === 200) {
                     setLastRefresh(new Date())
-                    setData(prev => ({
-                        ...prev,
-                        keys: data.keys
-                    }))
+                    setAllKeys(data)
                 }
             }).catch(ex => {
                 console.log(ex)
@@ -178,10 +163,7 @@ const Database = () => {
     // re-fetch all redis keys
     function handleRefetchKeys() {
         setShowForm("")
-        setData((prev) => ({
-            ...prev,
-            keys: []
-        }))
+        setAllKeys([])
         fetchAllKeys(databaseId, connectedDatabaseId)
     }
 
@@ -189,6 +171,9 @@ const Database = () => {
     function handleDoneAddKey() {
         setShowForm("")
         setShowKey("")
+
+        // increment keys number
+        dispatch(incrementKeys())
     }
 
     // handledelete key
@@ -197,11 +182,8 @@ const Database = () => {
 
         axios.post(`/databases/${databaseId}/keys/delete`, {keys: [key]}).then(({data, status}) => {
             if (status === 201) {
-                setData(prevState => ({
-                    ...prevState,
-                    total: prevState.total - 1,
-                    keys: prevState.keys.filter(item => item.key !== key)
-                }))
+                setAllKeys(allKeys.filter(item => item.key !== key))
+                dispatch(decrementKeys())
             }
         }).catch(ex => {
             console.log(ex)
@@ -209,11 +191,14 @@ const Database = () => {
     }
 
 
+
+
     const columns = [
         {
             title: 'Type',
             dataIndex: 'dataType',
             key: 'dataType',
+            width:  '120px',
             sorter: (a, b) => a.dataType > b.dataType ? 1 : a.dataType < b.dataType ? -1 : 0,
             render: (_, item) => <div>
                     <span className="list-type data-type">
@@ -294,26 +279,7 @@ const Database = () => {
             </Modal>
 
             <div>
-                <Row className="top-bar">
-                    <Col span={12}>
-
-                        <h3 className="page-title flex items-center">
-                            <FiArrowLeft size={20} onClick={handleGoBack} className="pointer"
-                                         style={{marginRight: "12px"}}/>
-
-                            <div className="flex items-center">
-                                <span>{selectedDatabase?.alias}</span>
-                                <Badge className="ml-2 badge-big" size="default"
-                                       status={(connectedDatabaseId && (databaseId === connectedDatabaseId)) ? "processing" : "default"}/>
-                            </div>
-                        </h3>
-
-                    </Col>
-                    <Col span={12} className="flex-right">
-                        <DatabaseSlats meta={data} username={user?.username}/>
-                    </Col>
-                </Row>
-                <div className="top-bar-space"></div>
+                <TopBarMeta  />
 
                 <div className="" style={{marginLeft: "60px"}}>
                     <Card className="w-full list-keys">
@@ -347,12 +313,12 @@ const Database = () => {
                     </Card>
 
 
-                    {selectedDatabase ?
+                    {currentSelectedDb ?
                         <div style={{padding: "15px"}} className="flex justify-between gap-x-5 w-full">
 
                             <div className="card w-full list-keys">
                                 <div className="flex items-center gap-x-2 justify-between">
-                                    <h4 style={{fontWeight: "600"}}>Total: {data.total}</h4>
+                                    <h4 style={{fontWeight: "600"}}>Total: {connectedDbMeta.totalKeys}</h4>
                                     <div className="flex items-center gap-x-2 ">
                                         <h4 style={{fontWeight: "600"}}>Last
                                             refresh: {moment().fromNow(lastRefresh)} </h4>
@@ -364,7 +330,7 @@ const Database = () => {
 
 
                                 {/******* render all redis keys ******/}
-                                <Table dataSource={data.keys} columns={columns} loading={data.keys.length === 0}/>
+                                <Table dataSource={allKeys} columns={columns} loading={allKeys.length === 0}/>
 
                             </div>
 
@@ -414,8 +380,8 @@ const Database = () => {
 
                                     {/******* add new redis key with value ******/}
                                     <AddKey
-                                        dataKeys={data}
-                                        setAllkeysData={setData}
+                                        dataKeys={allKeys}
+                                        setAllkeysData={setAllKeys}
                                         databaseId={databaseId}
                                         dataType={selectType}
                                         doneAddKey={handleDoneAddKey}
@@ -433,7 +399,7 @@ const Database = () => {
                                     showKey={showKey}
                                     connectedDatabaseId={connectedDatabaseId}
                                     databaseId={databaseId}
-                                    data={data}
+                                    data={allKeys}
                                     selectType={selectType}
                                 />
                             </div>

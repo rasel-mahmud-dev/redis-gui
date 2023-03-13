@@ -14,6 +14,7 @@ const ActionTypes = {
 
     // mark database connected active sign
     SET_ACTIVE_DATABASE_CONNECTION: "SET_ACTIVE_DATABASE_CONNECTION",
+    SET_DATABASE_META: "SET_DATABASE_META",
 }
 
 export default ActionTypes

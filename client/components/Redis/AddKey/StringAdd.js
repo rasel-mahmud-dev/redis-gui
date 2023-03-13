@@ -14,7 +14,7 @@ const StringAdd = ({selectType, databaseId, onAddKeyData, doneAddKey, setAllkeys
             message.error("Please provide string value ")
         }
 
-        let updatedKeys = [...dataKeys.keys]
+        let updatedKeys = [...dataKeys]
 
         const existsIndex = updatedKeys.findIndex(item=>item.key === keyName)
         if(existsIndex !== -1){
@@ -30,12 +30,7 @@ const StringAdd = ({selectType, databaseId, onAddKeyData, doneAddKey, setAllkeys
                     dataType: "string",
                     size: "104 B"
                 })
-                setAllkeysData(prev => ({
-                    ...prev,
-                    total: prev.total + 1,
-                    keys: updatedKeys
-                }))
-
+                setAllkeysData(updatedKeys)
                 doneAddKey && doneAddKey()
             }
 

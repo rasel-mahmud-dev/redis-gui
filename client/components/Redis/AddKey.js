@@ -20,6 +20,7 @@ const AddKey = ({dataType, dataKeys, databaseId, setAllkeysData, doneAddKey}) =>
 
     const Component = mapAddKey[dataType]
 
+    console.log(dataKeys)
 
     return (
         <div>

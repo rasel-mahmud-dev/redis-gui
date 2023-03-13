@@ -4,14 +4,19 @@ import {useDispatch, useSelector} from "react-redux";
 import {Badge, Popconfirm, Table} from "antd";
 import {BiPen, BiPencil, BiTrash} from "react-icons/bi";
 import ActionTypes from "../../store/actionTypes";
-import  {useRouter} from "next/router";
+import {useRouter} from "next/router";
 import axios from "axios";
 
 const ListDatabase = ({isLoaded}) => {
 
-    const router  = useRouter()
+    const router = useRouter()
 
-    const {databases, filterDatabaseListText, filterDatabases, connectedDatabaseId} = useSelector(state => state.redisTools)
+    const {
+        databases,
+        filterDatabaseListText,
+        filterDatabases,
+        connectedDatabaseId
+    } = useSelector(state => state.redisTools)
 
     const dispatch = useDispatch()
 
@@ -19,14 +24,14 @@ const ListDatabase = ({isLoaded}) => {
 
     function handleDelete(id) {
         // delete from database
-        axios.delete("databases/" + id).then(({status})=>{
-            if(status === 201){
+        axios.delete("databases/" + id).then(({status}) => {
+            if (status === 201) {
                 dispatch({
                     type: ActionTypes.DELETE_DATABASE,
                     payload: id
                 })
             }
-        }).catch(ex=>{
+        }).catch(ex => {
 
         })
     }
@@ -39,7 +44,7 @@ const ListDatabase = ({isLoaded}) => {
                 payload: selected
             })
 
-            router.push("/database/"+databaseId)
+            router.push("/database/" + databaseId)
         }
     }
 
@@ -58,9 +63,10 @@ const ListDatabase = ({isLoaded}) => {
             title: 'Database Alias',
             dataIndex: 'alias',
             key: "alias",
-            sorter: (a, b)=> a.alias > b.alias ? 1 : a.alias < b.alias ? -1 : 0,
-            render: (text, item) =><div>
-                 <Badge className="mr-2 badge-big" size="default" status={(item._id === connectedDatabaseId && connectedDatabaseId) ? "processing" : "default"} />
+            sorter: (a, b) => a.alias > b.alias ? 1 : a.alias < b.alias ? -1 : 0,
+            render: (text, item) => <div>
+                <Badge className="mr-2 badge-big" size="default"
+                       status={(item._id === connectedDatabaseId && connectedDatabaseId) ? "processing" : "default"}/>
                 <a onClick={() => handleSelectDatabase(item._id)}>{text}</a>
             </div>
             ,
@@ -69,7 +75,7 @@ const ListDatabase = ({isLoaded}) => {
         {
             title: 'Host:Port',
             dataIndex: 'hostPost',
-            sorter: (a, b)=> a.hostPost > b.hostPost ? 1 : a.hostPost < b.hostPost ? -1 : 0,
+            sorter: (a, b) => a.hostPost > b.hostPost ? 1 : a.hostPost < b.hostPost ? -1 : 0,
         },
         {
             title: 'Connection Type',
@@ -78,7 +84,7 @@ const ListDatabase = ({isLoaded}) => {
         {
             title: 'Last connection',
             dataIndex: 'lastConnection',
-            sorter: (a, b)=> a.lastConnection > b.lastConnection ? 1 : a.lastConnection < b.lastConnection ? -1 : 0,
+            sorter: (a, b) => a.lastConnection > b.lastConnection ? 1 : a.lastConnection < b.lastConnection ? -1 : 0,
         },
         {
             title: 'Action',
@@ -105,10 +111,10 @@ const ListDatabase = ({isLoaded}) => {
     ];
     let filterDbList = databases
 
-    if(filterDatabaseListText){
+    if (filterDatabaseListText) {
         filterDbList = filterDatabases
     }
-    const data =  filterDbList.map((item, idx) => ({
+    const data = filterDbList.map((item, idx) => ({
         _id: item._id,
         key: idx,
         alias: item.alias,

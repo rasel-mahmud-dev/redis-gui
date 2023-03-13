@@ -14,6 +14,7 @@ import DatabaseDetail from "../../components/Redis/Skeletons/DatabaseDetail";
 import RedisToolsLayout from "../../layout/RedisToolsLayout";
 import {colors, types} from "../database/[databaseId]";
 import {useRouter} from "next/router";
+import TopBarMeta from "../../components/Redis/TopBarMeta";
 
 
 const Workbench = () => {
@@ -48,26 +49,8 @@ const Workbench = () => {
 
                 <div>
 
-                    asdasd
-                    {/*<Row className="top-bar">*/}
-                    {/*    <Col span={12}>*/}
 
-                    {/*        <h3 className="page-title flex items-center">*/}
-                    {/*            <FiArrowLeft size={20} onClick={handleGoBack} className="pointer"*/}
-                    {/*                         style={{marginRight: "12px"}}/>*/}
-
-                    {/*            <div className="flex items-center">*/}
-                    {/*                <span>{selectedDatabase?.alias}</span>*/}
-                    {/*                <Badge className="ml-2 badge-big" size="default"*/}
-                    {/*                       status={(connectedDatabaseId && (databaseId === connectedDatabaseId)) ? "processing" : "default"}/>*/}
-                    {/*            </div>*/}
-                    {/*        </h3>*/}
-
-                    {/*    </Col>*/}
-                    {/*    <Col span={12} className="flex-right">*/}
-                    {/*        <DatabaseSlats meta={data} />*/}
-                    {/*    </Col>*/}
-                    {/*</Row>*/}
+                <TopBarMeta  />
 
 
                 </div>

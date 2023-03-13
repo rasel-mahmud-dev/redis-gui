@@ -10,7 +10,7 @@ const ListAdd = ({selectType, databaseId, doneAddKey, setAllkeysData, dataKeys})
         1: ""
     })
 
-    let updatedKeys = [...dataKeys.keys]
+    let updatedKeys = [...dataKeys]
 
 
     function handleAddMoreInputField() {
@@ -51,12 +51,8 @@ const ListAdd = ({selectType, databaseId, doneAddKey, setAllkeysData, dataKeys})
                     dataType: "list",
                     size: "104 B"
                 })
-                setAllkeysData(prev => ({
-                    ...prev,
-                    total: prev.total + 1,
-                    keys: updatedKeys
-                }))
 
+                setAllkeysData(updatedKeys)
                 doneAddKey && doneAddKey()
             }
         }).catch(ex => {

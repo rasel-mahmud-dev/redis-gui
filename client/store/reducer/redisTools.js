@@ -8,7 +8,13 @@ let init = {
     filterDatabases: [],
     currentSelectedDb: null, // {}
     filterDatabaseListText: "",
-    connectedDatabaseId: ""
+    connectedDatabaseId: "",
+    connectedDbMeta: {
+        memoryUsage: 0,
+        cpuUsage: 0,
+        totalKeys: 0,
+        connectedClients: 0,
+    }
 }
 
 const redisTools = (state = init, action) => {
@@ -76,8 +82,7 @@ const redisTools = (state = init, action) => {
                     ...action.payload
                 }
             }
-            console.log(updatedDatabase, action.payload
-            )
+
             return {
                 ...state,
                 databases: updatedDatabase
@@ -87,7 +92,8 @@ const redisTools = (state = init, action) => {
         case ActionTypes.SET_ACTIVE_DATABASE_CONNECTION :
             return {
                 ...state,
-                connectedDatabaseId: action.payload
+                connectedDatabaseId: action.payload.databaseId,
+                connectedDbMeta: action.payload.connectedDbMeta
             }
 
 
@@ -95,6 +101,15 @@ const redisTools = (state = init, action) => {
             return {
                 ...state,
                 currentSelectedDb: action.payload
+            }
+
+        case ActionTypes.SET_DATABASE_META :
+            return {
+                ...state,
+                connectedDbMeta: {
+                    ...state.connectedDbMeta,
+                    ...action.payload
+                }
             }
 
         case ActionTypes.CHANGE_SEARCH_DBLIST_TEXT :

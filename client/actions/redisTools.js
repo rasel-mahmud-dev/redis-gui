@@ -1,17 +1,18 @@
 import ActionTypes from "../store/actionTypes";
 import axios from "axios";
+import store from "../store";
 
-export function toggleOpenDbForm(){
+export function toggleOpenDbForm() {
     return {
         type: ActionTypes.TOGGLE_OPEN_ADD_DB_FORM
     }
 }
 
 
-export const fetchDatabases  = (cb) => async (dispatch)=>{
-    try{
-        let {data, status}  = await axios.get("/databases")
-        if(status === 200){
+export const fetchDatabases = (cb) => async (dispatch) => {
+    try {
+        let {data, status} = await axios.get("/databases")
+        if (status === 200) {
             dispatch({
                 type: ActionTypes.FETCH_DATABASES,
                 payload: data
@@ -19,8 +20,36 @@ export const fetchDatabases  = (cb) => async (dispatch)=>{
 
             cb(null)
         }
-    } catch (ex){
+    } catch (ex) {
         cb(ex)
     }
+}
 
+
+
+export const incrementKeys = () => {
+    let {redisTools} = store.getState()
+    if(redisTools && redisTools.connectedDbMeta){
+        let totalKeys = (redisTools.connectedDbMeta.totalKeys || 1) + 1
+        return {
+            type: ActionTypes.SET_DATABASE_META,
+            payload: {
+                totalKeys
+            }
+        }
+    }
+}
+
+
+export const decrementKeys = () => {
+    let {redisTools} = store.getState()
+    if(redisTools && redisTools.connectedDbMeta){
+        let totalKeys = (redisTools.connectedDbMeta.totalKeys || 0) - 1
+        return {
+            type: ActionTypes.SET_DATABASE_META,
+            payload: {
+                totalKeys
+            }
+        }
+    }
 }
