@@ -24,16 +24,17 @@ function RedisToolsLayout(props) {
     }, [currentSelectedDb, databases])
 
     return (
-        <div className="frame">
-            <div className="frame_root">
+        <div id="redis-management">
+            <div className="frame">
+                <div className="frame_root">
 
-                <Aside currentSelectedDb={currentSelectedDb} connectedDatabaseId={connectedDatabaseId} />
+                    <Aside currentSelectedDb={currentSelectedDb} connectedDatabaseId={connectedDatabaseId}/>
 
-                <div className="w-full">
-                    {props.children}
+                    <div className="w-full">
+                        {props.children}
+                    </div>
                 </div>
             </div>
-
         </div>
     )
 }

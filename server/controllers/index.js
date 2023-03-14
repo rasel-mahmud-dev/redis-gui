@@ -236,7 +236,7 @@ exports.deleteKeys = async (req, res, next) => {
 }
 
 
-// delete string value
+// get all keys
 exports.getKeys = async (req, res, next) => {
 
     const {databaseId} = req.params
@@ -246,20 +246,38 @@ exports.getKeys = async (req, res, next) => {
     try {
         let client = await redisConnections(databaseId)
 
+        const {keyType, search} = req.query
+
         let result = await client.keys("*")
+        if(search){
+            result = await client.keys(`*${search}*`)
+        }
         let output = []
+
 
         if (result && Array.isArray(result) && result.length > 0) {
             result.forEach((item, idx) => {
 
                 (async function () {
                     let dataType = await client.type(item)
+
                     let size = await client.memoryUsage(item)
-                    output.push({
-                        key: item,
-                        size: size,
-                        dataType
-                    })
+                    // if client pass keyType for filter then only return matched key with type
+                    if(keyType && keyType !== "All") {
+                        if(dataType === keyType) {
+                            output.push({
+                                key: item,
+                                size: size,
+                                dataType
+                            })
+                        }
+                    } else{
+                        output.push({
+                            key: item,
+                            size: size,
+                            dataType
+                        })
+                    }
 
                     if (idx + 1 === result.length) {
                         res.status(200).json(output)
@@ -270,6 +288,30 @@ exports.getKeys = async (req, res, next) => {
         } else {
             res.status(200).json(output)
         }
+
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+
+// run raw redis command
+exports.runRawCommand = async (req, res, next) => {
+
+    const {databaseId} = req.params
+    const {raw} = req.body
+
+    if (!databaseId) return res.status(403).json({message: "Please provide database id"})
+
+    try {
+        let client = await redisConnections(databaseId)
+        let result = await client.sendCommand([raw])
+        if(result){
+            res.status(200).send(result)
+        } else{
+           next("Wrong command")
+        }
+
 
     } catch (ex) {
         next(ex)

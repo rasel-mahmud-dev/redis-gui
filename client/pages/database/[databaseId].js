@@ -3,7 +3,6 @@ import RedisToolsLayout from "../../layout/RedisToolsLayout";
 import {Col, Row, Badge, Form, Card, Table, Modal} from "antd";
 
 import {useRouter} from "next/router";
-import {FiArrowLeft} from "react-icons/fi";
 import {BiPlus, BiRefresh, BiTrash} from "react-icons/bi";
 import {useDispatch, useSelector} from "react-redux";
 import {FaSearch} from "react-icons/fa";
@@ -19,6 +18,7 @@ import MySelect from "../../components/Redis/MySelect/MySelect";
 import TopBarMeta from "../../components/Redis/TopBarMeta";
 
 import {decrementKeys, incrementKeys} from "../../actions/redisTools"
+import {AiOutlineClear} from "react-icons/ai";
 
 
 export const colors = {
@@ -40,7 +40,7 @@ export const types = [
 
 const Database = () => {
 
-    const { currentSelectedDb, connectedDatabaseId, connectedDbMeta } = useSelector((state) => state.redisTools)
+    const {currentSelectedDb, connectedDatabaseId, connectedDbMeta} = useSelector((state) => state.redisTools)
     const {user} = useSelector((state) => state.auth)
 
     const [isShowErrorMessage, setShowErrorMessage] = useState(false)
@@ -49,9 +49,15 @@ const Database = () => {
     const [selectType, setSelectType] = useState("string")
     const [lastRefresh, setLastRefresh] = useState(new Date())
 
+    const [isFetchingKeys, setFetchingKeys] = useState(false)
 
     // {key: "name", dataType: "string", size: "104 B"}[],
     const [allKeys, setAllKeys] = useState([])
+
+    const [filter, setFilter] = useState({
+        keyType: "All",
+        search: ""
+    })
 
     const [isDatabaseConnectionFail, setDatabaseConnectionFail] = useState(false)
 
@@ -87,7 +93,7 @@ const Database = () => {
                                 type: ActionTypes.SET_ACTIVE_DATABASE_CONNECTION,
                                 payload: {
                                     databaseId: responseData.databaseId,
-                                    connectedDbMeta:  responseData.connectedDbMeta,
+                                    connectedDbMeta: responseData.connectedDbMeta,
                                 }
                             })
                         } else {
@@ -108,24 +114,28 @@ const Database = () => {
 
 
     // fetch all database keys
-    function fetchAllKeys(databaseId, connectedDatabaseId) {
+    function fetchAllKeys(databaseId, connectedDatabaseId, filter) {
 
         if (databaseId === connectedDatabaseId) {
             // get all database keys
+            setFetchingKeys(true)
+            let query = `search=${filter.search}&keyType=${filter.keyType}`
 
-            axios.get(`/databases/${connectedDatabaseId}/keys`).then(({data, status}) => {
+            axios.get(`/databases/${connectedDatabaseId}/keys?` + query).then(({data, status}) => {
                 if (status === 200) {
                     setLastRefresh(new Date())
                     setAllKeys(data)
                 }
             }).catch(ex => {
                 console.log(ex)
+            }).finally(() => {
+                setFetchingKeys(false)
             })
         }
     }
 
     useEffect(() => {
-        fetchAllKeys(databaseId, connectedDatabaseId)
+        fetchAllKeys(databaseId, connectedDatabaseId, filter)
     }, [databaseId, connectedDatabaseId])
 
 
@@ -158,7 +168,7 @@ const Database = () => {
     function handleRefetchKeys() {
         setShowForm("")
         setAllKeys([])
-        fetchAllKeys(databaseId, connectedDatabaseId)
+        fetchAllKeys(databaseId, connectedDatabaseId, filter)
     }
 
     // after completed add key
@@ -184,12 +194,10 @@ const Database = () => {
         })
     }
 
-    function removeKey(key){
+    function removeKey(key) {
         setAllKeys(allKeys.filter(item => item.key !== key))
         dispatch(decrementKeys())
     }
-
-
 
 
     const columns = [
@@ -197,7 +205,7 @@ const Database = () => {
             title: 'Type',
             dataIndex: 'dataType',
             key: 'dataType',
-            width:  '120px',
+            width: '120px',
             sorter: (a, b) => a.dataType > b.dataType ? 1 : a.dataType < b.dataType ? -1 : 0,
             render: (_, item) => <div>
                     <span className="list-type data-type">
@@ -250,6 +258,26 @@ const Database = () => {
         },
     ];
 
+    function handleChangeFilter(type, value) {
+        setFilter(prev => ({
+            ...prev,
+            [type]: value
+        }))
+    }
+
+    function handleFilterKeys() {
+        fetchAllKeys(databaseId, connectedDatabaseId, filter)
+    }
+
+    function clearFilter() {
+        let newState = {
+            search: "",
+            keyType: "All"
+        }
+        fetchAllKeys(databaseId, connectedDatabaseId, newState)
+        setFilter(newState)
+    }
+
 
     return (
         <RedisToolsLayout>
@@ -264,7 +292,8 @@ const Database = () => {
 
 
             {/**** Error Popup for redis cluster connection failure ****/}
-            <Modal className="add-database-modal" title="" cancelButtonProps={null} open={isDatabaseConnectionFail}
+            <Modal className="add-database-modal" title="" cancelButtonProps={null} onCancel={() => router.push("/")}
+                   open={isDatabaseConnectionFail}
                    footer={[
                        <button
                            className="default_button" onClick={() => router.push("/")}
@@ -278,39 +307,73 @@ const Database = () => {
             </Modal>
 
             <div>
-                <TopBarMeta  />
+                <TopBarMeta/>
 
+                {/********** Filter keys input **********/}
                 <div className="" style={{marginLeft: "60px"}}>
-                    <Card className="w-full list-keys">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center input-with-select">
-                                <select>
-                                    {types.map(item => (
-                                        <option>{item}</option>
-                                    ))
-                                    }
-                                </select>
-                                <input type="text" placeholder="Filer by key name"/>
-                                <div className="icon">
-                                    <FaSearch/>
+                    <Card className="w-full list-keys ">
+                        <div className="flex items-center justify-between group-input ">
+                            <div className="flex items-center gap-x-5">
+                                <div className="flex items-center input-with-select">
+                                    <MySelect
+                                        onChange={(type) => handleChangeFilter("keyType", type)}
+                                        optionRender={(onChange) => (
+                                            <div>
+                                                <li onClick={() => onChange("All")}>
+                                                    <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                           color={"#abf2fd"}/>
+                                                    All
+                                                </li>
+                                                {types.map((item, index) => (
+                                                    <li onClick={() => onChange(item)}>
+                                                        <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                               color={colors[item]}/>
+                                                        {item.toUpperCase()}
+                                                    </li>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        defaultValue={() => (
+                                            <div>
+                                                <Badge className="badge-big" style={{marginRight: "10px"}}
+                                                       color={filter.keyType === "All" ? "#abf2fd" : colors[filter.keyType]}/>
+                                                {filter.keyType.toUpperCase()}
+                                            </div>
+                                        )}
+                                    >
+                                    </MySelect>
+
+                                    <input
+                                        value={filter.search}
+                                        type="text"
+                                        onChange={(e) => handleChangeFilter("search", e.target.value)}
+                                        placeholder="Filer by key name"
+                                    />
+
+                                    <button className="default_button" onClick={handleFilterKeys}>
+                                        <FaSearch/>
+                                    </button>
                                 </div>
+
+                                <button className="default_button" onClick={clearFilter}>
+                                    <AiOutlineClear fontSize={18}/>
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-x-2">
-                                <div className="flex items-center input-with-select">
+                                <button className="default_button flex items-center gap-x-2" onClick={() => setShowForm("add")}>
                                     <HiBars3 size={22}/>
-                                </div>
+                                    <span>Key</span>
+                                </button>
 
-
-                                <div className="flex items-center input-with-select" onClick={() => setShowForm("add")}>
+                                <button className="default_button flex items-center gap-x-2" onClick={() => setShowForm("add")}>
                                     <BiPlus size={22}/>
                                     <span>Key</span>
-                                </div>
+                                </button>
                             </div>
-
                         </div>
                     </Card>
-
 
                     {currentSelectedDb ?
                         <div style={{padding: "15px"}} className="flex justify-between gap-x-5 w-full">
@@ -329,7 +392,7 @@ const Database = () => {
 
 
                                 {/******* render all redis keys ******/}
-                                <Table dataSource={allKeys} columns={columns} loading={allKeys.length === 0}/>
+                                <Table dataSource={allKeys} columns={columns} loading={isFetchingKeys}/>
 
                             </div>
 
@@ -393,7 +456,10 @@ const Database = () => {
                             {/******** show redis key value *******/}
                             {isShowForm === "value" && <div className="card w-full">
                                 <ShowKeyValues
-                                    onCloseShowValuePanel={(key)=>{setShowForm(""); removeKey(key) }}
+                                    onCloseShowValuePanel={(key) => {
+                                        setShowForm("");
+                                        removeKey(key)
+                                    }}
                                     onKeyNameChange={handleChangeKeyName}
                                     onCloseShowValue={handleCloseShowValue}
                                     showKey={showKey}

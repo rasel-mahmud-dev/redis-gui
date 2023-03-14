@@ -2,7 +2,7 @@ const {
     getAllDatabases, createDatabase, connectDatabase, getStringValue, createStringValue, updateStringValue,
     deleteKeys, getKeys, deleteDatabase, updateDatabase, getDatabase, updateKeyName, testConnectDatabase,
     createListValue, getListValue, pushListElement, deleteListElement, updateListElement, insertHashValue, getHashValues,
-    deleteHashKey, setHashKeyValue, getJSONValue, insertJSONValue, updateJSONValue
+    deleteHashKey, setHashKeyValue, getJSONValue, insertJSONValue, updateJSONValue, runRawCommand
 } = require("../controllers");
 
 const express = require("express");
@@ -56,6 +56,9 @@ router.put("/api/databases/:databaseId/key", isAuth, updateKeyName)
 
 // get current database keys
 router.get("/api/databases/:databaseId/keys", isAuth, getKeys)
+
+// execute raw redis command
+router.post("/api/databases/:databaseId/run", isAuth, runRawCommand)
 
 
 // test connection

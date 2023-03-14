@@ -35,52 +35,54 @@ const Login = () => {
         console.log('Failed:', errorInfo);
     };
     return (
-        <div className="login-form">
-            <h1>Login Form</h1>
-            <Form
-                layout="vertical"
-                name="basic"
-                initialValues={{
-                    remember: true,
-                }}
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-            >
-                <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your email',
-                        },
-                    ]}
+        <div id="redis-management">
+            <div className="login-form">
+                <h1>Login Form</h1>
+                <Form
+                    layout="vertical"
+                    name="basic"
+                    initialValues={{
+                        remember: true,
+                    }}
+                    onFinish={onFinish}
+                    onFinishFailed={onFinishFailed}
+                    autoComplete="off"
                 >
-                    <Input className="custom-input"/>
-                </Form.Item>
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your email',
+                            },
+                        ]}
+                    >
+                        <Input className="custom-input"/>
+                    </Form.Item>
 
-                <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your password!',
-                        },
-                    ]}
-                >
-                    <Input.Password className="custom-input"/>
-                </Form.Item>
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your password!',
+                            },
+                        ]}
+                    >
+                        <Input.Password className="custom-input"/>
+                    </Form.Item>
 
 
-                <p className="mb-4">Not account. <Link href="/registration">Create new one</Link></p>
+                    <p className="mb-4">Not account. <Link href="/registration">Create new one</Link></p>
 
-                <button className="default_button" style={{margin: "auto"}} type="primary" htmlType="submit">
-                    Submit
-                </button>
+                    <button className="default_button" style={{margin: "auto"}} type="primary" htmlType="submit">
+                        Submit
+                    </button>
 
-            </Form>
+                </Form>
+            </div>
         </div>
     );
 };

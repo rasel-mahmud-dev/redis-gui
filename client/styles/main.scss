@@ -3,7 +3,7 @@
 @import './common/variable';
 @import './common/default';
 @import './common/mixin';
-
+@import './common/utilites';
 @import "./pages/redis-gui";
 
 body{
@@ -13,116 +13,9 @@ body{
     background-color: #F8F8F8;
 }
 
-.text-primary{color: $primary_color}
-.flex{display: flex}
-.flex-column{flex-direction: column}
-.justify-center{justify-content: center}
-.justify-end{justify-content: end}
-.justify-between{justify-content: space-between}
-.items-center{align-items: center}
-.items-end{align-items: end}
-.items-start{align-items: start}
-.items-baseline{align-items: baseline}
-.w-full{width: 100%}
-.pointer{cursor: pointer}
-.overflow-y-auto{overflow-y: auto}
-.gap-x-2{column-gap: 5px}
-.gap-x-5{column-gap: 15px}
-.gap-x-10{column-gap: 30px}
-.mt-4{margin-top: 12px}
-.mt-2{margin-top: 5px}
-.ml-2{margin-left: 5px}
-.ml-4{margin-left: 12px}
-.mr-2{margin-right: 5px}
-.mr-4{margin-right: 12px}
-.mb-4{margin-bottom: 12px}
-.mb-2{margin-bottom: 5px}
-.pb-4{padding-bottom: 12px}
 
-.font-medium{font-weight: 500}
-.font-bold{font-weight: 700}
-.font-semiBold{font-weight: 600}
-.border-b{
-    border-bottom: 1px solid rgba(93, 93, 93, 0.2);
-}
 
-.input-with-select{
-    border: 1px solid rgba(72, 72, 72, 0.6);
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    padding: 4px 10px;
-    width: max-content;
 
-    select{
-        border-right: 1px solid #b6b6b6 !important;
-    }
-
-    input, select{
-        background: transparent;
-        outline: none;
-        border: none;
-        font-family: inherit;
-    }
-    input{
-        padding: 0 10px;
-    }
-    .icon{
-        border-left: 1px solid #b6b6b6 !important;
-        padding-left: 10px;
-        svg{
-            display: flex;
-        }
-    }
-}
-.square-icon{
-    width: 30px;
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #171717;
-    background: #eaeaea;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all .3s ease;
-    &:hover{
-        background: $primary-400;
-        color: white;
-    }
-
-    &.outline{
-        background: transparent;
-        border: 1px solid rgba(6, 37, 57, 0.12);
-        &:hover{
-            background: $primary-400 !important;
-            color: white;
-            svg {
-                color: #0ac0a6;
-            }
-        }
-
-        svg{
-            color: #626262;
-        }
-    }
-
-}
-.text-end{
-    text-align: end !important;
-}.text-center{
-    text-align: center !important;
-}
-.absolute{position: absolute}
-.top-10{top: 10px}
-.top-32{top: 32px}
-.-bottom-30{bottom: -30px}
-.right-0{right: 0px}
-.relative{position: relative}
-.pre-line{
-    white-space: pre-line;
-}
-.break-all{word-break: break-all}
 //thirdparty
 @import 'antd/dist/antd.css';
 

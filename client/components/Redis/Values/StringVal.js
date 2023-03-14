@@ -54,7 +54,6 @@ const StringVal = ({databaseId, keyName, onCloseShowValuePanel}) => {
     return (
         <div>
             {!isLoading ?
-
                 (
                     <div>
 

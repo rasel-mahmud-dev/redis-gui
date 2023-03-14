@@ -36,65 +36,67 @@ const Registration = () => {
         console.log('Failed:', errorInfo);
     };
     return (
-        <div className="login-form">
-            <h1>Create new account</h1>
-            <Form
-                layout="vertical"
-                name="basic"
-                initialValues={{
-                    remember: true,
-                }}
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-            >
-                <Form.Item
-                    label="Username"
-                    name="username"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your name',
-                        },
-                    ]}
+        <div id="redis-management">
+            <div className="login-form">
+                <h1>Create new account</h1>
+                <Form
+                    layout="vertical"
+                    name="basic"
+                    initialValues={{
+                        remember: true,
+                    }}
+                    onFinish={onFinish}
+                    onFinishFailed={onFinishFailed}
+                    autoComplete="off"
                 >
-                    <Input className="custom-input"/>
-                </Form.Item>
+                    <Form.Item
+                        label="Username"
+                        name="username"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your name',
+                            },
+                        ]}
+                    >
+                        <Input className="custom-input"/>
+                    </Form.Item>
 
-                <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your email',
-                        },
-                    ]}
-                >
-                    <Input className="custom-input"/>
-                </Form.Item>
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your email',
+                            },
+                        ]}
+                    >
+                        <Input className="custom-input"/>
+                    </Form.Item>
 
-                <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your password!',
-                        },
-                    ]}
-                >
-                    <Input.Password className="custom-input"/>
-                </Form.Item>
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your password!',
+                            },
+                        ]}
+                    >
+                        <Input.Password className="custom-input"/>
+                    </Form.Item>
 
 
-                <p className="mb-4">Already hava an account. <Link href="/login">Login Here</Link></p>
+                    <p className="mb-4">Already hava an account. <Link href="/login">Login Here</Link></p>
 
-                <button className="default_button" style={{margin: "auto"}} type="primary" htmlType="submit">
-                    Submit
-                </button>
+                    <button className="default_button" style={{margin: "auto"}} type="primary" htmlType="submit">
+                        Submit
+                    </button>
 
-            </Form>
+                </Form>
+            </div>
         </div>
     );
 };
