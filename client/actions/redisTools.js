@@ -27,7 +27,7 @@ export const fetchDatabases = (cb) => async (dispatch) => {
 export const incrementKeys = () => {
     let {redisTools} = store.getState()
     if(redisTools && redisTools.connectedDbMeta){
-        let totalKeys = (redisTools.connectedDbMeta.totalKeys || 1) + 1
+        let totalKeys = (redisTools.connectedDbMeta?.totalKeys || 1) + 1
         return {
             type: ActionTypes.SET_DATABASE_META,
             payload: {
@@ -40,7 +40,7 @@ export const incrementKeys = () => {
 export const decrementKeys = () => {
     let {redisTools} = store.getState()
     if(redisTools && redisTools.connectedDbMeta){
-        let totalKeys = (redisTools.connectedDbMeta.totalKeys || 0) - 1
+        let totalKeys = (redisTools.connectedDbMeta?.totalKeys || 0) - 1
         return {
             type: ActionTypes.SET_DATABASE_META,
             payload: {

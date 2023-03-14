@@ -1,7 +1,7 @@
 import React from 'react';
 import {Avatar, Tooltip} from "antd";
 import {MdMemory} from "react-icons/md";
-import {BiKey, BiUser} from "react-icons/bi";
+import {BiKey, BiMemoryCard, BiUser} from "react-icons/bi";
 import {FaEllipsisV} from "react-icons/fa";
 import AuthDropdown from "../AuthDropdown";
 
@@ -12,7 +12,7 @@ const DatabaseSlats = ({meta, username}) => {
         cpuUsage,
         totalKeys,
         connectedClients,
-    }  = meta
+    } = meta
 
     return (
 
@@ -26,14 +26,14 @@ const DatabaseSlats = ({meta, username}) => {
 
             <li className="">
                 <Tooltip title={`${memoryUsage}KB MEMORY Used`} className="flex items-center gap-x-2">
-                    <MdMemory/>
+                    <BiMemoryCard/>
                     <span>{(Number(memoryUsage) / 1024).toFixed(2)}  MB</span>
                 </Tooltip>
             </li>
 
             <li className="">
                 <Tooltip title={`Keys ${totalKeys}`} className="flex items-center gap-x-2">
-                    <BiKey/>
+                    <BiKey fontSize={18}/>
                     <span>{totalKeys}</span>
                 </Tooltip>
             </li>
@@ -41,7 +41,7 @@ const DatabaseSlats = ({meta, username}) => {
 
             <li>
                 <Tooltip title={`Client connected ${connectedClients}`} className="flex items-center gap-x-2">
-                    <BiUser/>
+                    <BiUser fontSize={15}/>
                     <span>{connectedClients || '0'}</span>
                 </Tooltip>
             </li>

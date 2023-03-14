@@ -94,6 +94,8 @@ const redisTools = (state = init, action) => {
                 ...state,
                 connectedDatabaseId: action.payload.databaseId,
                 connectedDbMeta: action.payload.connectedDbMeta
+                    ? action.payload.connectedDbMeta
+                    : state.connectedDbMeta
             }
 
 

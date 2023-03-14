@@ -317,7 +317,7 @@ const Database = () => {
 
                             <div className="card w-full list-keys">
                                 <div className="flex items-center gap-x-2 justify-between">
-                                    <h4 style={{fontWeight: "600"}}>Total: {connectedDbMeta.totalKeys}</h4>
+                                    <h4 style={{fontWeight: "600"}}>Total: {connectedDbMeta?.totalKeys}</h4>
                                     <div className="flex items-center gap-x-2 ">
                                         <h4 style={{fontWeight: "600"}}>Last
                                             refresh: {moment().fromNow(lastRefresh)} </h4>
