@@ -77,44 +77,7 @@
         display: flex;
     }
 
-    .custom-input {
-        width: 100%;
 
-        .ant-input-wrapper {
-            border: 2px solid #856e6e;
-            border-radius: 4px;
-
-            input {
-                border: none;
-                outline: none !important;
-                color: #808080;
-
-                &::placeholder {
-                    color: inherit;
-                }
-            }
-
-            .ant-input-group-addon {
-                background: #062539;
-
-                button {
-                    border: none
-                    //border-top-color: transparent;
-                }
-            }
-
-        }
-
-        &.ant-input {
-            border: 1px solid rgba(190, 190, 190, 0.45);
-            outline: none;
-            border-radius: 4px;
-
-            &:focus {
-                outline: none;
-            }
-        }
-    }
 
 
     .add-database-modal {
@@ -258,20 +221,6 @@
     }
 
 
-    .http-response {
-        border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 20px;
-
-        &.error-message {
-            background: rgba(229, 36, 36, 0.83);
-            color: white;
-        }
-
-        &.success-message {
-            background: #769ffc;
-        }
-    }
 
     .w-full {
         .ant-card-body {
@@ -478,5 +427,60 @@
             }
         }
 
+    }
+}
+
+
+.custom-input {
+    width: 100%;
+
+    .ant-input-wrapper {
+        border: 2px solid #856e6e;
+        border-radius: 4px;
+
+        input {
+            border: none;
+            outline: none !important;
+            color: #808080;
+
+            &::placeholder {
+                color: inherit;
+            }
+        }
+
+        .ant-input-group-addon {
+            background: #062539;
+
+            button {
+                border: none
+                //border-top-color: transparent;
+            }
+        }
+
+    }
+
+    &.ant-input {
+        border: 1px solid rgba(190, 190, 190, 0.45);
+        outline: none;
+        border-radius: 4px;
+
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+.http-response {
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 20px;
+
+    &.error-message {
+        background: rgba(229, 36, 36, 0.83);
+        color: white;
+    }
+
+    &.success-message {
+        background: #769ffc;
     }
 }

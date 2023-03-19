@@ -100,7 +100,7 @@ const Database = () => {
                             setDatabaseConnectionFail(true)
                         }
                     }).catch(ex => {
-                        // database connection fail
+                        // handle database connection fail error
                         setDatabaseConnectionFail(true)
                     })
                 }

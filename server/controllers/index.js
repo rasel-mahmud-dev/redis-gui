@@ -157,6 +157,9 @@ exports.getStringValue = async (req, res, next) => {
     }
 }
 
+
+
+
 // insert string value
 exports.createStringValue = async (req, res, next) => {
     const {databaseId} = req.params
@@ -168,7 +171,11 @@ exports.createStringValue = async (req, res, next) => {
     try {
         let client = await redisConnections(databaseId, redisClient)
         let result = await client.SET(key, value)
-        res.status(201).json({success: "ok"})
+        if(result){
+            res.status(201).json({success: "ok"})
+        } else{
+            next("Data inset fail")
+        }
     } catch (ex) {
         next(ex)
     }
